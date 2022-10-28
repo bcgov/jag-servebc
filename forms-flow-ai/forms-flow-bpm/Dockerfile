@@ -2,12 +2,17 @@
 
 # maven build
 FROM artifacts.developer.gov.bc.ca/docker-remote/maven:3.6.1-jdk-11-slim AS MAVEN_TOOL_CHAIN
+# FROM maven:3.6.1-jdk-11-slim AS MAVEN_TOOL_CHAIN
 
 RUN apt-get update \
     && apt-get install -y git 
+
+## THE FOLLOWING TWO LINES WERE ADDED FOR VULN SCANS
+# ARG FORMFLOW_SOURCE_REPO_BRANCH=v4.0.5-security-fixes
+# ARG FORMFLOW_SOURCE_REPO_URL=https://github.com/alazar-aot/forms-flow-ai-aidan-fork
+
     
 RUN git clone --branch ${FORMFLOW_SOURCE_REPO_BRANCH} ${FORMFLOW_SOURCE_REPO_URL} /bpm/
-
 
 
 COPY pom-docker.xml /tmp/pom.xml
@@ -28,9 +33,17 @@ RUN mvn -s /usr/share/maven/ref/settings-docker.xml package
 
 
 # final custom slim java image (for apk command see jdk-11.0.3_7-alpine-slim)
-FROM artifacts.developer.gov.bc.ca/docker-remote/adoptopenjdk/openjdk11:jdk-11.0.3_7-alpine
+FROM artifacts.developer.gov.bc.ca/docker-remote/adoptopenjdk/openjdk11:jdk-11.0.11_9-alpine
+# FROM adoptopenjdk/openjdk11:jdk-11.0.11_9-alpine
 
-ENV JAVA_VERSION jdk-11.0.3+7
+#Check for Package updates
+RUN apk update
+# Update Vulnerable Packages
+RUN apk add --upgrade apk-tools
+RUN apk add --upgrade busybox
+RUN apk add --upgrade libretls
+
+ENV JAVA_VERSION jdk-11.0.11+9
 ENV JAVA_HOME=/opt/java/openjdk \
     PATH="/opt/java/openjdk/bin:$PATH"
 
