@@ -1,20 +1,16 @@
 import React from "react";
 import "./footer.scss";
+import {version} from "../../../package.json"
 
+const version_org = version;
 const Footer = React.memo(() => {
+  //const today = new Date();
   return (
-    <footer class="footer">
-      <div class="container">
-        <ul>
-          <li><a href=".">Home</a></li>
-          <li><a href="https://www2.gov.bc.ca/gov/content/home/disclaimer">Disclaimer</a></li>
-          <li><a href="https://www2.gov.bc.ca/gov/content/home/privacy">Privacy</a></li>
-          <li><a href="https://www2.gov.bc.ca/gov/content/home/accessibility">Accessibility</a></li>
-          <li><a href="https://www2.gov.bc.ca/gov/content/home/copyright">Copyright</a></li>
-          <li><a href="https://www2.gov.bc.ca/gov/content/home/get-help-with-government-services">Contact Us</a></li>
-        </ul>
+    <div className="row footer">
+      <div className="col-12 text-center text-align">
+      Powered by<a href="https://formsflow.ai" target='_blank'  rel="noreferrer"> formsflow.ai </a> v{version_org} {/*{today.getFullYear()}*/}
       </div>
-    </footer>
+    </div>
   );
 });
 export default Footer;
