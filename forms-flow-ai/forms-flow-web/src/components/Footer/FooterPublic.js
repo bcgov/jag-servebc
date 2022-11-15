@@ -6,7 +6,7 @@ const FooterPublic = React.memo(() => {
     <footer class="footer">
       <div class="container">
         <ul>
-          <li><a href=".">Home</a></li>
+          <li><a href="/public/home/ncq">Home</a></li>
           <li><a href="https://www2.gov.bc.ca/gov/content/home/disclaimer">Disclaimer</a></li>
           <li><a href="https://www2.gov.bc.ca/gov/content/home/privacy">Privacy</a></li>
           <li><a href="https://www2.gov.bc.ca/gov/content/home/accessibility">Accessibility</a></li>
