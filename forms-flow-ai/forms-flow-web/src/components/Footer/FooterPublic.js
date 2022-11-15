@@ -1,5 +1,5 @@
 import React from "react";
-import "./footer.scss";
+import "./footerPublic.scss";
 
 const FooterPublic = React.memo(() => {
   return (

@@ -3,7 +3,6 @@ import UserService from '../services/UserService'
 import NavBar from "../containers/NavBar";
 import Card from "react-bootstrap/Card";
 import { Link } from "react-router-dom";
-import Footer from './Footer';
 
 const publicFormURL = `/public/form/servelegaldocuments`; // based on the form name: Serve Legal Documents
 const HomePage =({store})=>{
@@ -42,7 +41,6 @@ const HomePage =({store})=>{
                         
                     </div>
                 </section>
-                <Footer/>
           </div>
        )
 }

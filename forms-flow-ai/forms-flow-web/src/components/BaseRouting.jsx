@@ -8,6 +8,7 @@ import PrivateRoute from "./PrivateRoute";
 /*import SideBar from "../containers/SideBar";*/
 import NavBar from "../containers/NavBar";
 import Footer from "../components/Footer";
+import FooterPublic from "./Footer/FooterPublic";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
 
