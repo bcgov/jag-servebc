@@ -1,6 +1,6 @@
 @import "./../../assets/styles/themes.scss";
 
-.footer {
+.footer_ff {
   border-top: 2px solid #e8e8ee;
   padding-bottom: 15px;
   padding-top: 15px;
@@ -15,7 +15,7 @@
   bottom: 10px;
 }
 @media (max-width: 768px) {
-  .footer{
+  .footer_ff{
     width:100% !important;
   }
 }
