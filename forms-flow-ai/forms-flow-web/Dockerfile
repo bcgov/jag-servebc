@@ -94,7 +94,7 @@ COPY . /web
 # Build app
 
 #FROM docker-remote.artifacts.developer.gov.bc.ca/nginx:1.17 as production-stage
-FROM nginx:1.17 as production-stage
+FROM nginx:1.22.1 as production-stage
 RUN mkdir /nginx
 COPY --from=build-stage /web/build /usr/share/nginx/html
 COPY --from=build-stage /web/nginx.conf /etc/nginx/nginx.conf
