@@ -9,6 +9,7 @@ import NavBar from "../containers/NavBar";
 import NotFound from './NotFound'
  
 import HomePage from "./HomePage";
+import FooterPublic from './Footer/FooterPublic'
 
 const PublicRoute =({store})=>{
 
@@ -16,12 +17,15 @@ const PublicRoute =({store})=>{
         UserService.authenticateAnonymousUser(store)
     },[store])
     return (
+        <>
           <div className="container public-route">
               <NavBar/>
               <Route exact path="/public/form/:formId" component={View}/>
               <Route path="/public/form/:formId/:notavailable" component={NotFound}/>
               <Route exact path="/public/home/ncq"><HomePage store={store}/></Route>
           </div>
+          <FooterPublic/>
+        </>
        )
 }
 
