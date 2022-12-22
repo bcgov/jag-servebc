@@ -1,20 +1,12 @@
-
-
-# maven build
+#For bcgov openshift
 FROM artifacts.developer.gov.bc.ca/docker-remote/maven:3.6.1-jdk-11-slim AS MAVEN_TOOL_CHAIN
+#For local build
 # FROM maven:3.6.1-jdk-11-slim AS MAVEN_TOOL_CHAIN
 
-RUN apt-get update \
-    && apt-get install -y git 
-
-## THE FOLLOWING TWO LINES WERE ADDED FOR VULN SCANS
-# ARG FORMFLOW_SOURCE_REPO_BRANCH=v4.0.5-security-fixes
-# ARG FORMFLOW_SOURCE_REPO_URL=https://github.com/alazar-aot/forms-flow-ai-aidan-fork
-
-    
+RUN apt-get update && apt-get install -y git   
 RUN git clone --branch ${FORMFLOW_SOURCE_REPO_BRANCH} ${FORMFLOW_SOURCE_REPO_URL} /bpm/
 
-
+#Copy local copy of pom-docker.xml & settings-docker.xml
 COPY pom-docker.xml /tmp/pom.xml
 COPY settings-docker.xml /usr/share/maven/ref/
 
@@ -22,23 +14,19 @@ WORKDIR /tmp/
 
 # This allows Docker to cache most of the maven dependencies
 RUN mvn -s /usr/share/maven/ref/settings-docker.xml dependency:resolve-plugins dependency:resolve dependency:go-offline -B
+
 RUN cp -r /bpm/forms-flow-bpm/src/ /tmp/src/
-
 ARG CUSTOM_SRC_DIR=src/
-
 # Override these files they have custom changes in the jag-ospg repository
 COPY ./${CUSTOM_SRC_DIR}/  /tmp/${CUSTOM_SRC_DIR}/
 RUN mvn -s /usr/share/maven/ref/settings-docker.xml package
 
-
-
 # final custom slim java image (for apk command see jdk-11.0.3_7-alpine-slim)
-FROM artifacts.developer.gov.bc.ca/docker-remote/adoptopenjdk/openjdk11:jdk-11.0.11_9-alpine
+FROM artifacts.developer.gov.bc.ca/docker-remote/adoptopenjdk/openjdk11:jdk-11.0.11_9-alpine-slim
 # FROM adoptopenjdk/openjdk11:jdk-11.0.11_9-alpine
 
-#Check for Package updates
+#Check for Package updates & Update Vulnerable Packages
 RUN apk update
-# Update Vulnerable Packages
 RUN apk add --upgrade apk-tools
 RUN apk add --upgrade busybox
 RUN apk add --upgrade libretls
