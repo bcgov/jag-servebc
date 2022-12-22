@@ -18,7 +18,7 @@ const HomePage =({store})=>{
                         <h3>Serve Legal Documents</h3> 
                         This optional service is offered to facilitate serving Notices of Constituional Question and supporting documents on 
                         the Attorney General of British Columbia. Other options to serve the Attorney General of British Columbia and 
-                        Her Majesty the Queen in right of the Province of British Columbia are listed 
+                        His Majesty the King in right of the Province of British Columbia are listed 
                         at <a href="https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/justice-attorney-general/ministry-contacts/serving-legal-documents">
                              Serving Legal Documents on the Attorney General of British Columbia
                         </a>.
