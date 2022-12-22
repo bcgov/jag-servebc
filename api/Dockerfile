@@ -1,6 +1,5 @@
 # base image
-#FROM docker-remote.artifacts.developer.gov.bc.ca/node:12.4.0-alpine as build-stage
-FROM node:14.21.2-alpine as build-stage
+FROM FROM artifacts.developer.gov.bc.ca/docker-remote/node:18.10-alpine as build-stage
 
 # set working directory
 WORKDIR /api
@@ -27,4 +26,5 @@ RUN npm install
 # RUN node src/sqlite-example-database/setup.js
 
 EXPOSE 3003:3003
-CMD ["npm", "run", "start"]
+USER node
+CMD ["node", "src/index.js"]
