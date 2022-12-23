@@ -94,7 +94,7 @@ COPY . /web
 
 # Build app
 
-FROM artifacts.developer.gov.bc.ca/docker-remote/nginx:1.22 as production-stage
+FROM artifacts.developer.gov.bc.ca/docker-remote/nginx:1.22.1 as production-stage
 # FROM nginx:1.22 as production-stage
 RUN mkdir /nginx
 # Check for package updates
