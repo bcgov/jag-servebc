@@ -11,19 +11,6 @@ ENV PATH /web/node_modules/.bin:$PATH
 RUN apk update && apk upgrade && \
   apk add --no-cache bash git openssh
 
-
-# expect a build-time variable
-# use the value to set the ENV var default
-ENV FORMFLOW_SOURCE_REPO_BRANCH v4.0.5
-# ENV FORMFLOW_SOURCE_REPO_BRANCH v4.0.5-security-fixes
-# ARG FORMFLOW_SOURCE_REPO_BRANCH=v4.0.5-security-fixes
-# expect a build-time variable
-# ARG FORMFLOW_SOURCE_REPO_URL=https://github.com/alazar-aot/forms-flow-ai-aidan-fork
-# use the value to set the ENV var default
-# ENV FORMFLOW_SOURCE_REPO_URL https://github.com/alazar-aot/forms-flow-ai-aidan-fork
-ENV FORMFLOW_SOURCE_REPO_URL https://github.com/AOT-Technologies/forms-flow-ai
-
-
 ARG NODE_ENV
 ARG GENERATE_SOURCEMAP
 ARG REACT_APP_CLIENT_ROLE
