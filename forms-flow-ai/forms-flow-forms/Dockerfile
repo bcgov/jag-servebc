@@ -5,7 +5,7 @@
 # Use Node image, maintained by Docker:
 # hub.docker.com/r/_/node/
 FROM artifacts.developer.gov.bc.ca/docker-remote/node:lts-alpine3.17 as BUILD
-RUN apk add git --no-cahce
+RUN apk add git --no-cache
 
 # expect a build-time variable
 ARG FORMFLOW_SOURCE_REPO_BRANCH
