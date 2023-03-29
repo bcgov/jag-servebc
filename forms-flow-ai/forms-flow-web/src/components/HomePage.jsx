@@ -16,7 +16,7 @@ const HomePage =({store})=>{
                 <section className="mx-auto">
                     <div className="home mx-auto" style={{ width: '90vw', paddingTop: '3rem' }}>
                         <h3>Serve Legal Documents</h3> 
-                        This optional service is offered to facilitate serving Notices of Constituional Question and supporting documents on 
+                        This optional service is offered to facilitate serving Notices of Constitutional Question and supporting documents on 
                         the Attorney General of British Columbia. Other options to serve the Attorney General of British Columbia and 
                         His Majesty the King in right of the Province of British Columbia are listed 
                         at <a href="https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/justice-attorney-general/ministry-contacts/serving-legal-documents">
