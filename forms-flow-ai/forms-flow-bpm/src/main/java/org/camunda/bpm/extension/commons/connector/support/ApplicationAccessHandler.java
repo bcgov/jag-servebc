@@ -44,7 +44,6 @@ public class ApplicationAccessHandler implements IAccessHandler {
         payload = (payload == null) ? new JsonObject().toString() : payload;
 
         Mono<ResponseEntity<String>> entityMono = webClient.method(method).uri(url)
-                .attributes(clientRegistrationId("keycloak-client"))
                 .headers(h -> h.setBearerAuth(getUserBasedAccessToken()))
                 .accept(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -68,10 +67,10 @@ public class ApplicationAccessHandler implements IAccessHandler {
         if (token == null || token.isEmpty()) {
             try {
                 token = keycloakServiceClientTokenService.getClientToken();
+                LOGGER.info("Token received from service account %s", token);
             } catch (JsonProcessingException jpe) {
                 throw new RuntimeException("Failed to retrieve access token from Keycloak", jpe);
             }
-            
         }
         return token;
     }
