@@ -1,4 +1,4 @@
-FROM  image-registry.openshift-image-registry.svc:5000/openshift/postgresql:12-el8
+FROM  image-registry.openshift-image-registry.svc:5000/openshift/postgresql:10
 
 #Update Software Repository
 USER root
