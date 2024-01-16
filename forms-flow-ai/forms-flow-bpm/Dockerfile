@@ -26,10 +26,7 @@ FROM artifacts.developer.gov.bc.ca/docker-remote/adoptopenjdk/openjdk11:jdk-11.0
 # FROM adoptopenjdk/openjdk11:jdk-11.0.11_9-alpine
 
 #Check for Package updates & Update Vulnerable Packages
-RUN apk update
-RUN apk add --upgrade apk-tools
-RUN apk add --upgrade busybox
-RUN apk add --upgrade libretls
+RUN apk update && apk add --upgrade apk-tools && apk add --upgrade busybox && apk add --upgrade libretls
 
 ENV JAVA_VERSION jdk-11.0.11+9
 ENV JAVA_HOME=/opt/java/openjdk \
