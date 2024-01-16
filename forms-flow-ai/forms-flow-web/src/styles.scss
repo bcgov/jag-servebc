@@ -612,3 +612,17 @@ a.main-nav.nav-item.active-tab.dropdown-item:target {
   border-bottom-right-radius: inherit;
 	border-bottom-left-radius: inherit;
 }
+
+a { 
+	overflow: visible; 
+	text-align: left; 
+	overflow-wrap: break-word; 
+	word-wrap: break-word; 
+	color: #1A5A96; 
+	text-decoration: underline; 
+} 
+
+a:hover {
+	text-decoration: none; 
+	color: blue;
+}
