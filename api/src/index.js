@@ -1,16 +1,18 @@
 const app = require('./app');
 const sequelize = require('./model');
+const logger = require("./logger");
+
 const serverPort = 3003;
 
 
 async function assertDatabaseConnectionOk() {
-	console.log(`Checking database connection...`);
+	logger.info(`[api.initialization.db] Checking database connection.`);
 	try {
 		await sequelize.authenticate();
-		console.log('Database connection OK!');
+		logger.info('[api.db.init] Database connection OK!');
 	} catch (error) {
-		console.log('Unable to connect to the database:');
-		console.log(error.message);
+		logger.error('[api.db.init] Unable to connect to the database:');
+		logger.error('[api.db.init]',error);
 		process.exit(1);
 	}
 }
@@ -18,7 +20,7 @@ async function assertDatabaseConnectionOk() {
 async function init() {
 	await assertDatabaseConnectionOk();
 	app.listen(serverPort, () => {
-		console.log(`Server started on port ${serverPort}.`);
+		logger.info(`[api.init] Server started on port ${serverPort}.`);
 	});
 }
 

@@ -5,6 +5,9 @@ const keycloak = require('./keycloak-config.js')
 const { configuredSession } = require('./session-config.js')
 const cors = require("cors")
 const { uploadFile, getFile, removeFile } = require('./routes/files')
+const logger = require("./logger");
+const morgan = require("morgan");
+var audit = require('express-requests-logger');
 
 const apiVersion = 'v1'
 
@@ -16,6 +19,7 @@ const routes = {
 	servedDocuments: require('./routes/served-documents'),
 	// Add more routes here...
 	// items: require('./routes/items'),
+	health: require('./routes/healthcheck'),
 };
 
 
@@ -46,6 +50,88 @@ app.use(keycloak.middleware({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+
+//For logging request details
+//app.use(morgan("[:date[iso]] info :method :url Status- :status Content-Length- :res[content-length] Response Time - :response-time ms"));
+//morgan.token('status', (req, res) => res.statusCode);
+morgan.token('statusMessage', (req, res) => res.statusMessage);
+
+app.use(morgan((tokens, req, res) => {
+	const status = tokens.status(req, res);
+	const logLevel = getStatusLogLevel(status);
+	if (logLevel === "info") {
+		logger.log(logLevel, `${tokens.method(req, res)} ${tokens.url(req, res)} ${status}-${tokens.statusMessage(req, res)} [ContentLength] ${tokens.res(req, res, 'content-length')} [ResponseTime] ${tokens['response-time'](req, res)} ms`);
+		logger.debug(``)
+	}
+	else {
+		logger.log(logLevel, `${tokens.method(req, res)} ${tokens.url(req, res)} ${status}-${tokens.statusMessage(req, res)} [Response Time] ${tokens['response-time'](req, res)} ms`);
+	}
+}));
+
+// Function to determine log level based on status code
+function getStatusLogLevel(status) {
+	if (status >= 400) {
+	  return 'error';
+	}
+	else if (status >= 300) {
+	  return 'warn';
+	}
+	return 'info';
+  }
+
+/* Another logging option
+const morganMiddleware = morgan(
+	':method :url [Status]-:status ,[ContentLength]-:res[content-length] ,[ResponseTime] - :response-time ms',
+	{
+	  stream: {
+		// Configure Morgan to use our custom logger with the http severity
+		if (:status >= 200 && :status <300) {
+			write: (message) => logger.info(message.trim()),
+		}
+		else {
+			write: (message) => logger.error(message.trim()),
+
+		}
+	  },
+	}
+  );
+app.use(morganMiddleware);
+*/
+
+//Logging request & response details for failed requests
+app.use(audit({
+    logger: logger,
+    excludeURLs: ['healthcheck'], // Exclude paths which enclude 'healthcheck'
+    request: {
+        maskBody: [''], // Mask '' field in incoming requests
+        excludeHeaders: ['*'], // Exclude '*' (all) header from requests
+        excludeBody: [''], // Exclude '' field from requests body
+        maskHeaders: [''], // Mask '' header in incoming requests
+        maxBodyLength: 50 // limit length to 50 chars + '...'
+    },
+    response: {
+        maskBody: [''], // Mask '' field in response body
+        excludeHeaders: ['*'], // Exclude all headers from responses,
+        excludeBody: [''], // Exclude '' body from responses
+        maskHeaders: [''], // Mask '' header in incoming requests
+        maxBodyLength: 50, // limit length to 50 chars + '...'
+		levels: {
+			"2xx":"info", // All 2xx responses are info
+			"4xx":"error", // All 4xx are error
+			"503":"warn",
+			"5xx":"error" // All 5xx except 503 are errors, 503 is warn,
+		}
+    },
+    shouldSkipAuditFunc: function(req, res){
+        let shouldSkip = false;
+		//Skip auditing for successful requests
+		if (res.statusCode >= 200 && res.statusCode < 300) {
+			shouldSkip = true;
+		}
+  		return shouldSkip;
+    }
+}));
+
 // We create a wrapper to workaround async errors not being transmitted correctly.
 function makeHandlerAwareOfAsyncErrors(handler) {
 	return async function(req, res, next) {
@@ -59,6 +145,7 @@ function makeHandlerAwareOfAsyncErrors(handler) {
 
 // We provide a root route just as an example
 app.get('/', (req, res) => {
+	logger.info("[api.init] API is running...");
 	res.send(`API is running...`);
 });
 
@@ -76,104 +163,32 @@ app.delete(`/api/${apiVersion}/files/:fileId`, removeFile)
 
 // Define REST APIs for each route (if they exist).
 for (const [routeName, routeController] of Object.entries(routes)) {
-	if (routeController.getByQuery) {
-		if (routeController.allAuth || routeController.getByQuery_auth) {
-			app.get(
-				`/api/${apiVersion}/${routeName}`,
-				keycloak.protect(),
-				makeHandlerAwareOfAsyncErrors(routeController.getByQuery)
-			);
-		} else {
-			app.get(
-				`/api/${apiVersion}/${routeName}`,
-				makeHandlerAwareOfAsyncErrors(routeController.getByQuery)
-			);
-		}
-	}	
-	if (routeController.getAll) {
-		if (routeController.allAuth || routeController.getAll_auth) {
-			app.get(
-				`/api/${apiVersion}/${routeName}`,
-				keycloak.protect(),
-				makeHandlerAwareOfAsyncErrors(routeController.getAll)
-			);
-		} else {
-			app.get(
-				`/api/${apiVersion}/${routeName}`,
-				makeHandlerAwareOfAsyncErrors(routeController.getAll)
-			);
-		}
+ 
+	const routeConfigurations = [
+	  { method: 'getByQuery', verb: 'get' },
+	  { method: 'getAll', verb: 'get' },
+	  { method: 'getById', verb: 'get', param: '/:id' },
+	  { method: 'create', verb: 'post' },
+	  { method: 'update', verb: 'put', param: '/:id' },
+	  { method: 'updateByApplicationId', verb: 'put' },
+	  { method: 'remove', verb: 'delete', param: '/:id' },
+	  { method: 'healthcheck', verb: 'get', path: '/healthcheck' } // Use a distinct path
+	];
+  
+	for (const config of routeConfigurations) {
+	  const { method, verb, param, path } = config;
+  
+	  if (routeController[method]) {
+		const routePath = param ? `/api/${apiVersion}/${routeName}${param}` : `/api/${apiVersion}/${routeName}`;
+		const routeMiddleware = routeController.allAuth || routeController[`${method}_auth`] ? keycloak.protect() : null;
+  
+		// Use a distinct path for the health check route
+		const finalPath = method === 'healthcheck' ? `/api/${apiVersion}${path}` : routePath;
+  
+		app[verb](finalPath, routeMiddleware, makeHandlerAwareOfAsyncErrors(routeController[method]));
+	  }
 	}
-	if (routeController.getById) {
-		if (routeController.allAuth || routeController.getById_auth) {
-			app.get(
-				`/api/${apiVersion}/${routeName}/:id`,
-				keycloak.protect(),
-				makeHandlerAwareOfAsyncErrors(routeController.getById)
-			);
-		} else {
-			app.get(
-				`/api/${apiVersion}/${routeName}/:id`,
-				makeHandlerAwareOfAsyncErrors(routeController.getById)
-			);
-		}
-	}
-	if (routeController.create) {
-		if (routeController.allAuth || routeController.create_auth) {
-			app.post(
-				`/api/${apiVersion}/${routeName}`,
-				keycloak.protect(),
-				makeHandlerAwareOfAsyncErrors(routeController.create)
-			);
-		} else {
-			app.post(
-				`/api/${apiVersion}/${routeName}`,
-				makeHandlerAwareOfAsyncErrors(routeController.create)
-			);
-		}
-	}
-	if (routeController.update) {
-		if (routeController.allAuth || routeController.update_auth) {
-			app.put(
-				`/api/${apiVersion}/${routeName}/:id`,
-				keycloak.protect(),
-				makeHandlerAwareOfAsyncErrors(routeController.update)
-			);
-		} else {
-			app.put(
-				`/api/${apiVersion}/${routeName}/:id`,
-				makeHandlerAwareOfAsyncErrors(routeController.update)
-			);
-		}
-	}
-	if (routeController.updateByApplicationId) {
-		if (routeController.allAuth || routeController.updateByApplicationId_auth) {
-			app.put(
-				`/api/${apiVersion}/${routeName}/`,
-				keycloak.protect(),
-				makeHandlerAwareOfAsyncErrors(routeController.updateByApplicationId)
-			);
-		} else {
-			app.put(
-				`/api/${apiVersion}/${routeName}/`,
-				makeHandlerAwareOfAsyncErrors(routeController.updateByApplicationId)
-			);
-		}
-	}
-	if (routeController.remove) {
-		if (routeController.allAuth || routeController.remove_auth) {
-			app.delete(
-				`/api/${apiVersion}/${routeName}/:id`,
-				keycloak.protect(),
-				makeHandlerAwareOfAsyncErrors(routeController.remove)
-			);
-		} else {
-			app.delete(
-				`/api/${apiVersion}/${routeName}/:id`,
-				makeHandlerAwareOfAsyncErrors(routeController.remove)
-			);
-		}
-	}
-}
+  }
+  
 
 module.exports = app;
