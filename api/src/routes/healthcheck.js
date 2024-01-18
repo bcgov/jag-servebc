@@ -14,6 +14,6 @@ async function healthcheck(req, res) {
 
 // export router with all routes included
 module.exports = {
-	"allAuth": true,
+	"allAuth": false,
 	healthcheck
 };

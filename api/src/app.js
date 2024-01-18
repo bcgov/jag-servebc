@@ -180,12 +180,20 @@ for (const [routeName, routeController] of Object.entries(routes)) {
   
 	  if (routeController[method]) {
 		const routePath = param ? `/api/${apiVersion}/${routeName}${param}` : `/api/${apiVersion}/${routeName}`;
-		const routeMiddleware = routeController.allAuth || routeController[`${method}_auth`] ? keycloak.protect() : null;
-  
+		//const routeMiddleware = routeController.allAuth || routeController[`${method}_auth`] ? keycloak.protect() : null;
+		const routeMiddleware = routeController.allAuth ? keycloak.protect() : (routeController[`${method}_auth`] ? keycloak.protect() : null);
 		// Use a distinct path for the health check route
 		const finalPath = method === 'healthcheck' ? `/api/${apiVersion}${path}` : routePath;
+
+		if (!routeMiddleware) {
+			logger.debug(`No middleware assigned for route: ${method}`);
+			app[verb](finalPath, makeHandlerAwareOfAsyncErrors(routeController[method]));
+		}
+		else {
+			logger.debug(`Middleware assigned for route: ${method}`);
+			app[verb](finalPath, routeMiddleware, makeHandlerAwareOfAsyncErrors(routeController[method]));
+		}
   
-		app[verb](finalPath, routeMiddleware, makeHandlerAwareOfAsyncErrors(routeController[method]));
 	  }
 	}
   }
