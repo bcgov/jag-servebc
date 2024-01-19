@@ -1,5 +1,5 @@
 # base image
-FROM artifacts.developer.gov.bc.ca/docker-remote/node:14.7.0-alpine as build-stage
+FROM artifacts.developer.gov.bc.ca/docker-remote/node:14.21.3-alpine as build-stage
 # FROM node:14.21.0-alpine as build-stage
 
 # set working directory
