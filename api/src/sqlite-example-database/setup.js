@@ -1,8 +1,9 @@
 const sequelize = require('../model');
 const { pickRandom, randomDate } = require('./helpers/random');
+const logger = require("../logger");
 
 async function reset() {
-	console.log('Will reset the database.');
+	logger.info('[apt.db.reset] This Will reset the database.');
 	
 	await sequelize.sync({ force: true });
 
@@ -60,7 +61,7 @@ async function reset() {
 	// 	}
 	// ]);
 
-	console.log('Done!');
+	logger.info('[api.db.reset] Done!');
 }
 
 reset();

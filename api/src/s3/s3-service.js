@@ -1,5 +1,6 @@
 const aws4  = require('aws4');
 const axios = require('axios');
+const logger = require("../logger");
 require('dotenv').config();
 
 const BUCKETNAME = process.env.S3_BUCKETNAME;
@@ -37,10 +38,11 @@ const s3UploadFile = async (fileS3Name,
             headers,
             data: fileData
         });
+        logger.info('[api.s3]', resp.status,' s3 upload completed');
         return resp;
     } catch (error) {
-        console.log(error.response.data)
-        throw error
+        logger.error('[api.s3] S3 upload encountered error - ',error.response.status,'-',error.response.data);
+        throw error;
     }
 }
 
@@ -60,10 +62,11 @@ const s3DownloadFile = async (fileS3Name) => {
             headers,
             responseType: 'arraybuffer'
         });
+        logger.error('[api.s3] S3 download encountered error - ',error.response.status,'-',error.response.data);
         return resp;
     } catch (error) {
-        console.log(error.response.data)
-        throw error
+        logger.error('[api.s3]' , error.response.data);
+        throw error;
     }
 }
 module.exports = {

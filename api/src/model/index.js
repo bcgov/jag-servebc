@@ -1,5 +1,6 @@
 const { Sequelize } = require('sequelize');
 const { applyExtraSetup } = require('./extra-setup');
+const logger = require("../logger");
 require('dotenv').config();
 
 // const sequelize = new Sequelize({
@@ -19,16 +20,15 @@ const DB_USE_POSTGRES = process.env.DB_USE_POSTGRES;
 let sequelize = null;
 
 if (DB_USE_POSTGRES==="true") {
-	console.log('Connecting to Postgres DB')
-	console.log('DB_NAME:', DB_NAME)
+	logger.info('[api.db.init.model] Connecting to Postgres DB ', DB_NAME);
 	sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
 		host: DB_HOST,
 		port: DB_PORT,
 		dialect: 'postgres',
+		logging: false
 	})
 } else {
-	console.log('Connecting to MSSQL DB')
-	console.log('DB_NAME:', DB_NAME)
+	logger.info('[api.db.init.model] Connecting to MSSQL DB ', DB_NAME);
 	sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
 		host: DB_HOST,
 		port: DB_PORT,
