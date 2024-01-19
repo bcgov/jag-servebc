@@ -1,6 +1,6 @@
 # base image
 FROM artifacts.developer.gov.bc.ca/docker-remote/node:14.7.0-alpine as build-stage
-# FROM node:14.17.0-alpine as build-stage
+# FROM node:14.21.0-alpine as build-stage
 
 # set working directory
 WORKDIR /web
@@ -73,22 +73,20 @@ RUN cp -R /tmp/${CUSTOM_PUBLIC_DIR}/* /web/ && rm -Rf /tmp/${CUSTOM_PUBLIC_DIR}/
 # Install Dependencies 
 COPY package.json ./
 
-RUN npm install
-RUN npm run build
-
+RUN npm install --unsafe-perm --production
 # Copy code in the docker image (avoids npm install if no dependencies have changed)
 COPY . /web
-
 # Build app
+RUN npm run build
 
-FROM artifacts.developer.gov.bc.ca/docker-remote/nginx:1.22.1 as production-stage
+FROM artifacts.developer.gov.bc.ca/docker-remote/nginx:1.25.3-alpine as production-stage
 # FROM nginx:1.22 as production-stage
 RUN mkdir /nginx
 # Check for package updates
-RUN apt-get update
+RUN apk update && apk upgrade 
 # Update vulnerable packages 
-RUN apt-get install zlib1g=1:1.2.11.dfsg-2+deb11u2
-RUN apt-get install libxslt1.1=1.1.34-4+deb11u1  
+#RUN apt-get install zlib1g=1:1.2.11.dfsg-2+deb11u2
+#RUN apt-get install libxslt1.1=1.1.34-4+deb11u1  
 
 COPY --from=build-stage /web/build /usr/share/nginx/html
 COPY --from=build-stage /web/nginx.conf /etc/nginx/nginx.conf
