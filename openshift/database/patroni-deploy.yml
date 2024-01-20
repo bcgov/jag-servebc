@@ -1,7 +1,7 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: ${NAME}
+  name: patroni-deploy
   annotations:
     description: >-
       Patroni Postgresql database cluster, with persistent storage.
@@ -164,7 +164,7 @@ objects:
         restartPolicy: Always
         schedulerName: default-scheduler
         securityContext: {}
-        serviceAccountName: ${NAME}
+        serviceAccountName: ${NAME}-sa
         terminationGracePeriodSeconds: 0
     updateStrategy:
       type: RollingUpdate
