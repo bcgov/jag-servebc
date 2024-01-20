@@ -16,7 +16,7 @@ objects:
       superuser-username: ${PATRONI_SUPERUSER_USERNAME}
       superuser-password: ${PATRONI_SUPERUSER_PASSWORD}
       database-name: ${APP_DB_NAME}
-      database-user: app_database_user
+      database-user: ${APP_DB_PASSWORD}
       database-password: ${APP_DB_PASSWORD}
   - apiVersion: v1
     kind: ServiceAccount
@@ -115,6 +115,8 @@ parameters:
     from: "[a-zA-Z0-9]{32}"
   - name: APP_DB_NAME
     value: servelegaldb
+  - name: APP_DB_USER
+    value: servelegaluser
   - name: APP_DB_PASSWORD
     generate: expression
     from: "[a-zA-Z0-9]{32}"
