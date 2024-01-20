@@ -84,37 +84,37 @@ objects:
             valueFrom:
               secretKeyRef:
                 key: superuser-username
-                name: ${NAME}-creds
+                name: ${NAME}-secret
           - name: PATRONI_SUPERUSER_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: superuser-password
-                name: ${NAME}-creds
+                name: ${NAME}-secret
           - name: PATRONI_REPLICATION_USERNAME
             valueFrom:
               secretKeyRef:
                 key: replication-username
-                name: ${NAME}-creds
+                name: ${NAME}-secret
           - name: PATRONI_REPLICATION_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: replication-password
-                name: ${NAME}-creds
+                name: ${NAME}-secret
           - name: APP_USER
             valueFrom:
               secretKeyRef:
                 key: database-user
-                name: ${NAME}-creds
+                name: ${NAME}-secret
           - name: APP_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: database-password
-                name: ${NAME}-creds
+                name: ${NAME}-secret
           - name: APP_DATABASE
             valueFrom:
               secretKeyRef:
                 key: database-name
-                name: ${NAME}-creds
+                name: ${NAME}-secret
           - name: PATRONI_SCOPE
             value: ${NAME}
           - name: PATRONI_NAME
@@ -193,9 +193,9 @@ objects:
     maxUnavailable: 1
 parameters:
 - name: NAME
-  value: patroni
+  value: servelegal-patroni
 - name: PROJECT 
-  value: sims
+  value: ServeLegal
 - name: REPLICAS
   description: |
     The number of StatefulSet replicas to use.

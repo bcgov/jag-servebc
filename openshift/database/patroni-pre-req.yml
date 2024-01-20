@@ -9,7 +9,7 @@ objects:
   - apiVersion: v1
     kind: Secret
     metadata:
-      name: ${NAME}-creds
+      name: ${NAME}-secret
     stringData:
       replication-username: ${PATRONI_REPLICATION_USERNAME}
       replication-password: ${PATRONI_REPLICATION_PASSWORD}
@@ -21,7 +21,7 @@ objects:
   - apiVersion: v1
     kind: ServiceAccount
     metadata:
-      name: ${NAME}
+      name: ${NAME}-sa
   - apiVersion: rbac.authorization.k8s.io/v1
     kind: Role
     metadata:
@@ -83,15 +83,15 @@ objects:
       name: ${NAME}
     subjects:
       - kind: ServiceAccount
-        name: ${NAME}
+        name: ${NAME}-sa
 parameters:
   - name: NAME
     description: |
       The name of the application for labelling all artifacts.
     displayName: Application Name
-    value: patroni
+    value: servelegal-patroni
   - name: PROJECT
-    value: sims
+    value: ServeLegal
   - name: PATRONI_SUPERUSER_USERNAME
     description: |
       Username of the superuser account for initialization.
@@ -114,7 +114,7 @@ parameters:
     generate: expression
     from: "[a-zA-Z0-9]{32}"
   - name: APP_DB_NAME
-    value: SIMSDB
+    value: servelegaldb
   - name: APP_DB_PASSWORD
     generate: expression
     from: "[a-zA-Z0-9]{32}"
