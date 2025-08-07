@@ -32,7 +32,6 @@ const HomePage =({store})=>{
                           Serving Legal Documents on the Attorney General of British Columbia
                         </a>.
                       </p>
-                        <br/><br/>
                         <Card style={{ width: '90vw', marginLeft: 'auto', marginRight: 'auto', marginTop: '1rem' }}>
                             <Card.Header className="bg-default">Information Collection Notice</Card.Header>
                             <Card.Body>
@@ -41,7 +40,6 @@ const HomePage =({store})=>{
                                 Protection of Privacy Act</i> and will be used only for the purpose of confirming service of your 
                                 document(s) and serving documents on you. If you have any questions about the collection, use 
                                 or disclosure of this information, please call Information Access Operations at 250-387-1321.
-                                    <br /><br /><br />
                                     <div className="w-100 text-center">
                                         <Link to={publicFormURL} className="btn btn-primary">Continue</Link>
                                     </div>
