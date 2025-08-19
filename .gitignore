@@ -1,4 +1,5 @@
 forms-flow-ai/forms-flow-web/.env
+forms-flow-ai/forms-flow-web/*.onlylocal
 forms-flow-ai/forms-flow-bpm/src/main/resources/templates/document-received.ftl
 forms-flow-ai/forms-flow-bpm/src/main/resources/templates/document-received.ftl:Zone.Identifier
 forms-flow-ai/forms-flow-bpm/src/main/resources/templates/document-served.ftl

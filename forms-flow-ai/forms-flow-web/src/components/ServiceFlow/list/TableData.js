@@ -7,15 +7,15 @@ const TableData = React.memo(
         <td>
           {timeFormatter(data)}
         </td>
-      );
-    } else if (data === 'noticeOfConstitutionalQuestionAndSupportingDocuments'){
+      ); 
+    } /* else if (data === 'noticeOfConstitutionalQuestionAndSupportingDocuments'){
       // Display the abbreviation for the document type instead of the full title
       return (
         <td>
           {"NCQ"}
         </td>
       );
-    } else if(data === 'Inprogress'){
+    }*/ else if(data === 'Inprogress'){
       return (
         <td>
           {"In Progress"}

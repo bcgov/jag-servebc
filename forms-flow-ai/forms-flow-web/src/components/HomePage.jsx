@@ -27,8 +27,8 @@ const HomePage =({store})=>{
                         <li><b>Petition</b></li>
                       </ul>
                       <p>
-                        Other options to serve the Attorney General of British Columbia and His Majesty the King in right of the Province of British Columbia are listed at
-                        <a href="https://www2.gov.bc.ca/gov/content/justice/courthouse-services/documents/serving-legal-documents" target="_blank" rel="noopener noreferrer">
+                        Other options to serve the Attorney General of British Columbia and His Majesty the King in right of the Province of British Columbia are listed at 
+                        <a href="https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/attorney-general/ministry-contacts/serving-legal-documents" target="_blank" rel="noopener noreferrer">
                           Serving Legal Documents on the Attorney General of British Columbia
                         </a>.
                       </p>
