@@ -8,100 +8,10 @@
         </inputExpression>
       </input>
       <output id="Output_1" name="daytype" typeRef="string" />
-      <rule id="DecisionRule_1mlae3z">
-        <description>New Year</description>
-        <inputEntry id="UnaryTests_0y0i4yk">
-          <text>"2022-01-01"</text>
-        </inputEntry>
-        <outputEntry id="LiteralExpression_002zut5">
-          <text>"holiday"</text>
-        </outputEntry>
-      </rule>
-      <rule id="DecisionRule_1629k94">
-        <description>Family Day</description>
-        <inputEntry id="UnaryTests_1kxtk15">
-          <text>"2022-02-21"</text>
-        </inputEntry>
-        <outputEntry id="LiteralExpression_0qzx4fd">
-          <text>"holiday"</text>
-        </outputEntry>
-      </rule>
-      <rule id="DecisionRule_13cm1lx">
-        <description>Good Friday</description>
-        <inputEntry id="UnaryTests_0qj8evl">
-          <text>"2022-04-15"</text>
-        </inputEntry>
-        <outputEntry id="LiteralExpression_0xf38ym">
-          <text>"holiday"</text>
-        </outputEntry>
-      </rule>
-      <rule id="DecisionRule_0vpr56h">
-        <description>Victoria Day</description>
-        <inputEntry id="UnaryTests_1n2xvhl">
-          <text>"2022-05-23"</text>
-        </inputEntry>
-        <outputEntry id="LiteralExpression_0svxxsi">
-          <text>"holiday"</text>
-        </outputEntry>
-      </rule>
-      <rule id="DecisionRule_0g6royf">
-        <description>Canada Day</description>
-        <inputEntry id="UnaryTests_09nei94">
-          <text>"2022-07-01"</text>
-        </inputEntry>
-        <outputEntry id="LiteralExpression_1tban8q">
-          <text>"holiday"</text>
-        </outputEntry>
-      </rule>
-      <rule id="DecisionRule_0vhj7to">
-        <description>BC Day</description>
-        <inputEntry id="UnaryTests_1pb8yyn">
-          <text>"2022-08-01"</text>
-        </inputEntry>
-        <outputEntry id="LiteralExpression_1su4v5v">
-          <text>"holiday"</text>
-        </outputEntry>
-      </rule>
-      <rule id="DecisionRule_0mbktu0">
-        <description>Labour Day</description>
-        <inputEntry id="UnaryTests_0irh9ma">
-          <text>"2022-09-05"</text>
-        </inputEntry>
-        <outputEntry id="LiteralExpression_0e7fast">
-          <text>"holiday"</text>
-        </outputEntry>
-      </rule>
-      <rule id="DecisionRule_1pgabss">
-        <description>Thanksgiving Day</description>
-        <inputEntry id="UnaryTests_0au4sxl">
-          <text>"2022-10-10"</text>
-        </inputEntry>
-        <outputEntry id="LiteralExpression_1m0c72k">
-          <text>"holiday"</text>
-        </outputEntry>
-      </rule>
-      <rule id="DecisionRule_09yxuv4">
-        <description>Remembrance Day</description>
-        <inputEntry id="UnaryTests_07i1r5d">
-          <text>"2022-11-11"</text>
-        </inputEntry>
-        <outputEntry id="LiteralExpression_1wenulo">
-          <text>"holiday"</text>
-        </outputEntry>
-      </rule>
-      <rule id="DecisionRule_0x944m1">
-        <description>Christmas Day</description>
-        <inputEntry id="UnaryTests_0o75guw">
-          <text>"2022-12-25"</text>
-        </inputEntry>
-        <outputEntry id="LiteralExpression_1tdgzwh">
-          <text>"holiday"</text>
-        </outputEntry>
-      </rule>
       <rule id="DecisionRule_1fgpwjn">
         <description>New Year</description>
         <inputEntry id="UnaryTests_0xtykn0">
-          <text>"2023-01-01"</text>
+          <text>"2025-01-01"</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_0xu5bww">
           <text>"holiday"</text>
@@ -110,7 +20,7 @@
       <rule id="DecisionRule_1phxi32">
         <description>Family Day</description>
         <inputEntry id="UnaryTests_1512t66">
-          <text>"2023-02-20"</text>
+          <text>"2025-02-17"</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_00iujlf">
           <text>"holiday"</text>
@@ -119,7 +29,7 @@
       <rule id="DecisionRule_0vcrc4b">
         <description>Good Friday</description>
         <inputEntry id="UnaryTests_02e5p51">
-          <text>"2023-04-07"</text>
+          <text>"2025-04-08"</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_01t0e07">
           <text>"holiday"</text>
@@ -128,7 +38,7 @@
       <rule id="DecisionRule_1hv2fk8">
         <description>Victoria Day</description>
         <inputEntry id="UnaryTests_0azhoq3">
-          <text>"2023-05-22"</text>
+          <text>"2025-05-19"</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_0cmokfd">
           <text>"holiday"</text>
@@ -137,7 +47,7 @@
       <rule id="DecisionRule_057wsyt">
         <description>Canada Day</description>
         <inputEntry id="UnaryTests_1q6tndt">
-          <text>"2023-07-01"</text>
+          <text>"2025-07-01"</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_1m9jo3s">
           <text>"holiday"</text>
@@ -146,7 +56,7 @@
       <rule id="DecisionRule_122ve7m">
         <description>BC Day</description>
         <inputEntry id="UnaryTests_06bczbn">
-          <text>"2023-08-07"</text>
+          <text>"2025-08-04"</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_1v7qrhy">
           <text>"holiday"</text>
@@ -155,16 +65,25 @@
       <rule id="DecisionRule_1q14cer">
         <description>Labour Day</description>
         <inputEntry id="UnaryTests_1dl2pwq">
-          <text>"2023-09-04"</text>
+          <text>"2025-09-01"</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_0ochzo9">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_16ctkvw">
+        <description>National Day for Truth and Reconciliation</description>
+        <inputEntry id="UnaryTests_1h9mfau">
+          <text>"2025-09-30"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0gxu92s">
           <text>"holiday"</text>
         </outputEntry>
       </rule>
       <rule id="DecisionRule_044m11m">
         <description>Thanksgiving Day</description>
         <inputEntry id="UnaryTests_0y9808x">
-          <text>"2023-10-09"</text>
+          <text>"2025-10-13"</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_1jd9tdg">
           <text>"holiday"</text>
@@ -173,7 +92,7 @@
       <rule id="DecisionRule_1mdrgwg">
         <description>Remembrance Day</description>
         <inputEntry id="UnaryTests_0lzp4fz">
-          <text>"2023-11-11"</text>
+          <text>"2025-11-11"</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_1j7i0u0">
           <text>"holiday"</text>
@@ -182,26 +101,116 @@
       <rule id="DecisionRule_15qc9vc">
         <description>Christmas Day</description>
         <inputEntry id="UnaryTests_00frlo1">
-          <text>"2023-12-25"</text>
+          <text>"2025-12-25"</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_0fbdmn1">
           <text>"holiday"</text>
         </outputEntry>
       </rule>
-      <rule id="DecisionRule_06s0uyk">
-        <description>For UAT Test</description>
-        <inputEntry id="UnaryTests_1vo3zgz">
-          <text>"2022-07-22"</text>
+      <rule id="DecisionRule_11dcl7w">
+        <description>New Year</description>
+        <inputEntry id="UnaryTests_1lh9268">
+          <text>"2024-01-01"</text>
         </inputEntry>
-        <outputEntry id="LiteralExpression_181tt3g">
+        <outputEntry id="LiteralExpression_09bb5tx">
           <text>"holiday"</text>
         </outputEntry>
       </rule>
-      <rule id="DecisionRule_0qmgrda">
-        <inputEntry id="UnaryTests_0fra4cg">
+      <rule id="DecisionRule_1x75mjn">
+        <description>Family Day</description>
+        <inputEntry id="UnaryTests_1dw8bcb">
+          <text>"2024-02-19"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1hdpra8">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1g5ld1b">
+        <description>Good Friday</description>
+        <inputEntry id="UnaryTests_1w0rkvk">
+          <text>"2024-03-29"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0ogn5a4">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1ug7val">
+        <description>Victoria Day</description>
+        <inputEntry id="UnaryTests_1b2dd4s">
+          <text>"2024-05-20"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0h1ocfl">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0nregfu">
+        <description>Canada Day</description>
+        <inputEntry id="UnaryTests_0sg452a">
+          <text>"2024-07-01"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0capncw">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1vge2ys">
+        <description>BC Day</description>
+        <inputEntry id="UnaryTests_104tnv5">
+          <text>"2024-08-05"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1e1kxb8">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_057mnp2">
+        <description>Labour Day</description>
+        <inputEntry id="UnaryTests_18pb2t5">
+          <text>"2024-09-02"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1tu1ybp">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_18rbuyz">
+        <description>National Day for Truth and Reconciliation</description>
+        <inputEntry id="UnaryTests_0j4zi6h">
+          <text>"2024-09-30"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0to3z28">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1wto1xb">
+        <description>Thanksgiving Day</description>
+        <inputEntry id="UnaryTests_0rru43h">
+          <text>"2024-10-14"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_15pd068">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_14x4gnr">
+        <description>Remembrance Day</description>
+        <inputEntry id="UnaryTests_0of9c67">
+          <text>"2024-11-11"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0gpq5iy">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0k5pxyf">
+        <description>Christmas Day</description>
+        <inputEntry id="UnaryTests_1f3atqd">
+          <text>"2024-12-25"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0sxswp1">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0g5y4az">
+        <inputEntry id="UnaryTests_0o6poyl">
           <text></text>
         </inputEntry>
-        <outputEntry id="LiteralExpression_1ta84fe">
+        <outputEntry id="LiteralExpression_08pn15t">
           <text>"workday"</text>
         </outputEntry>
       </rule>

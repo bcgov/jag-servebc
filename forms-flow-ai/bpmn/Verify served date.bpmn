@@ -1,480 +1,429 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-    xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-    xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-    xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-    xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0tvt410"
-    targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.8.1"
-    modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.15.0">
-    <bpmn:process id="VerifyServedDateProcess" name="Verify served date" isExecutable="true">
-        <bpmn:startEvent id="StartStartEvent" name="Start">
-            <bpmn:outgoing>Flow_1g4tyjv</bpmn:outgoing>
-        </bpmn:startEvent>
-        <bpmn:sequenceFlow id="Flow_1g4tyjv" sourceRef="StartStartEvent"
-            targetRef="CheckForHolidayTask" />
-        <bpmn:businessRuleTask id="CheckForHolidayTask" name="Check for holiday"
-            camunda:resultVariable="result" camunda:decisionRef="holidays-key"
-            camunda:mapDecisionResult="singleEntry">
-            <bpmn:extensionElements>
-                <camunda:inputOutput>
-                    <camunda:inputParameter name="datesubmitted">
-                        <camunda:script scriptFormat="javascript">var system = java.lang.System;
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0tvt410" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.8.1" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.15.0">
+  <bpmn:process id="VerifyServedDateProcess" name="Verify served date" isExecutable="true">
+    <bpmn:startEvent id="StartStartEvent" name="Start">
+      <bpmn:outgoing>Flow_1g4tyjv</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1g4tyjv" sourceRef="StartStartEvent" targetRef="CheckForHolidayTask" />
+    <bpmn:businessRuleTask id="CheckForHolidayTask" name="Check for holiday" camunda:resultVariable="result" camunda:decisionRef="holidays-key" camunda:mapDecisionResult="singleEntry">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="datesubmitted">
+            <camunda:script scriptFormat="javascript">var system = java.lang.System;
 
-                            var tempdate = new Date(receiveddate);
-                            var tempdatestring = tempdate.getFullYear()+"-"+("0" +
-                            (tempdate.getMonth() + 1)).slice(-2) +"-"+("0" +
-                            tempdate.getDate()).slice(-2);
+var tempdate = new Date(receiveddate);
+var tempdatestring = tempdate.getFullYear()+"-"+("0" + (tempdate.getMonth() + 1)).slice(-2) +"-"+("0" + tempdate.getDate()).slice(-2);
 
-                            system.out.println( " "+ new Date() + " tempdatestring UPDATED:" +
-                            tempdatestring );
+system.out.println( " "+ new Date() + " tempdatestring UPDATED:" + tempdatestring );
 
-                            tempdatestring;
+tempdatestring; 
 
 
-                            //receiveddate.slice(0,-1);//return</camunda:script>
-                    </camunda:inputParameter>
-                    <camunda:outputParameter name="daytype">${result}</camunda:outputParameter>
-                </camunda:inputOutput>
-            </bpmn:extensionElements>
-            <bpmn:incoming>Flow_1g4tyjv</bpmn:incoming>
-            <bpmn:outgoing>Flow_0itx03o</bpmn:outgoing>
-        </bpmn:businessRuleTask>
-        <bpmn:sequenceFlow id="Flow_0itx03o" sourceRef="CheckForHolidayTask"
-            targetRef="CheckForWeekTypeTask">
-            <bpmn:extensionElements>
-                <camunda:executionListener event="take">
-                    <camunda:script scriptFormat="javascript">var tempdate = new Date(receiveddate);
-                        execution.setVariable('daynumber',tempdate.getDay());
-                        execution.setVariable('inputhour',tempdate.getHours() +
-                        (tempdate.getMinutes()/60)+(tempdate.getSeconds()/3600));
+//receiveddate.slice(0,-1);//return</camunda:script>
+          </camunda:inputParameter>
+          <camunda:outputParameter name="daytype">${result}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1g4tyjv</bpmn:incoming>
+      <bpmn:outgoing>Flow_0itx03o</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:sequenceFlow id="Flow_0itx03o" sourceRef="CheckForHolidayTask" targetRef="CheckForWeekTypeTask">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">var tempdate = new Date(receiveddate);
+execution.setVariable('daynumber',tempdate.getDay()); 
+execution.setVariable('inputhour',tempdate.getHours() + (tempdate.getMinutes()/60)+(tempdate.getSeconds()/3600));
 
-                        var system = java.lang.System;
-                        system.out.println( " "+ new Date() + " : daytype in holiday -" + daytype);
-                        system.out.println( " "+ new Date() + " : daynumber for check for weektype-"
-                        + daynumber);
+var system = java.lang.System;
+system.out.println( " "+ new Date() + " : daytype in holiday -" + daytype);
 
-                        system.out.println( " "+ new Date() + " : hour in Check for weektype -" +
-                        inputhour);</camunda:script>
-                </camunda:executionListener>
-            </bpmn:extensionElements>
-        </bpmn:sequenceFlow>
-        <bpmn:businessRuleTask id="CheckForWeekTypeTask" name="Check for week type"
-            camunda:resultVariable="result" camunda:decisionRef="weektype-key"
-            camunda:mapDecisionResult="singleEntry">
-            <bpmn:extensionElements>
-                <camunda:inputOutput>
-                    <camunda:inputParameter name="inputhour">${inputhour}</camunda:inputParameter>
-                    <camunda:inputParameter name="weekday">${daynumber}</camunda:inputParameter>
-                    <camunda:outputParameter name="weektype">${result}</camunda:outputParameter>
-                </camunda:inputOutput>
-                <camunda:executionListener event="end">
-                    <camunda:script scriptFormat="javascript">var system=java.lang.System;
-                        var payload = execution.getVariable('container');
-                        var payloadObj = JSON.parse(payload);
+system.out.println( " "+ new Date() + " : daynumber for check for weektype-" + daynumber);
 
-                        var contactEmail="";
-                        if (payloadObj.contactEmail){
-                        contactEmail=payloadObj.contactEmail;
-                        }
+system.out.println( " "+ new Date() + " : hour in Check for weektype -" + inputhour);</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:businessRuleTask id="CheckForWeekTypeTask" name="Check for week type" camunda:resultVariable="result" camunda:decisionRef="weektype-key" camunda:mapDecisionResult="singleEntry">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="inputhour">${inputhour}</camunda:inputParameter>
+          <camunda:inputParameter name="weekday">${daynumber}</camunda:inputParameter>
+          <camunda:outputParameter name="weektype">${result}</camunda:outputParameter>
+        </camunda:inputOutput>
+        <camunda:executionListener event="end">
+          <camunda:script scriptFormat="javascript">var system=java.lang.System;
+var payload = execution.getVariable('container');
+var payloadObj = JSON.parse(payload);
 
-                        execution.setVariable('contactEmail',contactEmail);
+var contactEmail="";
+if (payloadObj.contactEmail){
+contactEmail=payloadObj.contactEmail;
+}
 
-                    </camunda:script>
-                </camunda:executionListener>
-            </bpmn:extensionElements>
-            <bpmn:incoming>Flow_0itx03o</bpmn:incoming>
-            <bpmn:outgoing>Flow_13f5arp</bpmn:outgoing>
-        </bpmn:businessRuleTask>
-        <bpmn:exclusiveGateway id="WorkingDayGateway" name="working day?">
-            <bpmn:incoming>Flow_13f5arp</bpmn:incoming>
-            <bpmn:outgoing>WorkingTimeSequenceFlow</bpmn:outgoing>
-            <bpmn:outgoing>OutOfOfficeHoursSequenceFlow</bpmn:outgoing>
-        </bpmn:exclusiveGateway>
-        <bpmn:sequenceFlow id="Flow_13f5arp" sourceRef="CheckForWeekTypeTask"
-            targetRef="WorkingDayGateway">
-            <bpmn:extensionElements>
-                <camunda:executionListener event="take">
-                    <camunda:script scriptFormat="javascript">var system = java.lang.System;
-                        system.out.println( " "+ new Date() + " : weektype in Check for weektype-" +
-                        weektype);
-                    </camunda:script>
-                </camunda:executionListener>
-            </bpmn:extensionElements>
-        </bpmn:sequenceFlow>
-        <bpmn:task id="SendServedEmailTask" name="Send Served Email">
-            <bpmn:extensionElements>
-                <camunda:executionListener event="start">
-                    <camunda:script scriptFormat="javascript">var system=java.lang.System;
-                        system.out.println( " "+ new Date() + " : Sent Served Email since it is " +
-                        daytype + " :: " + weektype + "on " + receiveddate);</camunda:script>
-                </camunda:executionListener>
-                <camunda:executionListener
-                    expression="${execution.getProcessEngineServices().getRuntimeService().createMessageCorrelation(&#34;message-email&#34;).setVariable(&#34;category&#34;, documentType).setVariable(&#34;contactEmail&#34;,contactEmail).setVariable(&#34;applicationId&#34;,applicationId).correlateWithResult()}"
-                    event="end" />
-                <camunda:executionListener event="start">
-                    <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus',
-                        'Only Served Email sent. No further processing done’');
-                        execution.setVariable('servedDate', new Date().toLocaleString());
-                        execution.setVariable('serveDateInISOFormat', new Date().toISOString());</camunda:script>
-                </camunda:executionListener>
-            </bpmn:extensionElements>
-            <bpmn:incoming>WorkingTimeSequenceFlow</bpmn:incoming>
-            <bpmn:incoming>Flow_1da0wtp</bpmn:incoming>
-            <bpmn:outgoing>Flow_1f8f778</bpmn:outgoing>
-        </bpmn:task>
-        <bpmn:sequenceFlow id="WorkingTimeSequenceFlow" name="working time"
-            sourceRef="WorkingDayGateway" targetRef="SendServedEmailTask">
-            <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.getVariable('daytype')
-                == "workday" &amp;&amp; execution.getVariable('weektype') == "weekday"}</bpmn:conditionExpression>
-        </bpmn:sequenceFlow>
-        <bpmn:sequenceFlow id="OutOfOfficeHoursSequenceFlow" name="Out of office hours"
-            sourceRef="WorkingDayGateway" targetRef="NextWorkingDayTask">
-            <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.getVariable('daytype')
-                == "holiday" || execution.getVariable('weektype') != "weekday"}</bpmn:conditionExpression>
-        </bpmn:sequenceFlow>
-        <bpmn:endEvent id="EndEndEvent" name="end">
-            <bpmn:incoming>Flow_0zmq7m7</bpmn:incoming>
-        </bpmn:endEvent>
-        <bpmn:sequenceFlow id="Flow_1f8f778" sourceRef="SendServedEmailTask"
-            targetRef="SaveProcessDataCallActivity" />
-        <bpmn:businessRuleTask id="NextWorkingDayTask" name="next working day"
-            camunda:resultVariable="result" camunda:decisionRef="nextworkingday-key"
-            camunda:mapDecisionResult="singleResult">
-            <bpmn:extensionElements>
-                <camunda:inputOutput>
-                    <camunda:inputParameter name="weekday">${execution.getVariable('weektype')}</camunda:inputParameter>
-                    <camunda:inputParameter name="workday">${execution.getVariable('daytype')}</camunda:inputParameter>
-                    <camunda:outputParameter name="updated">${result.updated}</camunda:outputParameter>
-                    <camunda:outputParameter name="daystoadd">${result.daystoadd}</camunda:outputParameter>
-                </camunda:inputOutput>
-            </bpmn:extensionElements>
-            <bpmn:incoming>Flow_1brc4bu</bpmn:incoming>
-            <bpmn:incoming>OutOfOfficeHoursSequenceFlow</bpmn:incoming>
-            <bpmn:outgoing>Flow_00pxn3a</bpmn:outgoing>
-        </bpmn:businessRuleTask>
-        <bpmn:exclusiveGateway id="WorkingDayIdentifiedGateway" name="Working Day identified ?">
-            <bpmn:incoming>Flow_00pxn3a</bpmn:incoming>
-            <bpmn:outgoing>NoSequenceFlow</bpmn:outgoing>
-            <bpmn:outgoing>YesSequenceFlow</bpmn:outgoing>
-        </bpmn:exclusiveGateway>
-        <bpmn:sequenceFlow id="Flow_00pxn3a" sourceRef="NextWorkingDayTask"
-            targetRef="WorkingDayIdentifiedGateway">
-            <bpmn:extensionElements>
-                <camunda:executionListener event="take">
-                    <camunda:script scriptFormat="javascript">var system = java.lang.System;
-                        system.out.println( " "+ new Date() + " : updated in next working day - " +
-                        updated);
+execution.setVariable('contactEmail',contactEmail);
 
-                        system.out.println( " "+ new Date() + " : DaysToAdd in next working day -"
-                        +daystoadd);
+</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0itx03o</bpmn:incoming>
+      <bpmn:outgoing>Flow_13f5arp</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:exclusiveGateway id="WorkingDayGateway" name="working day?">
+      <bpmn:incoming>Flow_13f5arp</bpmn:incoming>
+      <bpmn:outgoing>WorkingTimeSequenceFlow</bpmn:outgoing>
+      <bpmn:outgoing>OutOfOfficeHoursSequenceFlow</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_13f5arp" sourceRef="CheckForWeekTypeTask" targetRef="WorkingDayGateway">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">var system = java.lang.System;
+system.out.println( " "+ new Date() + " : weektype in Check for weektype-" + weektype);
+</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:task id="SendServedEmailTask" name="Send Served Email">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="start">
+          <camunda:script scriptFormat="javascript">var system=java.lang.System;
+system.out.println( " "+ new Date() + " : Sent Served Email since it is " + daytype + " :: " + weektype + "on " + receiveddate);
 
-                        var reviseddate = new Date(receiveddate);
-                        system.out.println( " "+ new Date() + " : Revised date before change - " +
-                        reviseddate);
+var system=java.lang.System;
+system.out.println(new Date().toLocaleDateString() + " ::" + applicationId + ":: " + "Sent Served Email since it is " + daytype + " :: " + weektype + "on " + receiveddate);</camunda:script>
+        </camunda:executionListener>
+        <camunda:executionListener expression="${execution.getProcessEngineServices().getRuntimeService().createMessageCorrelation(&#34;message-email-servebc&#34;).setVariable(&#34;category&#34;, &#34;served_email&#34;).setVariable(&#34;contactEmail&#34;,contactEmail).setVariable(&#34;docTypeCode&#34;,documentType).setVariable(&#34;applicationId&#34;,applicationId).correlateWithResult()}" event="end" />
+        <camunda:executionListener event="start">
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', 'Only Served Email sent. No further processing done');
+execution.setVariable('servedDate', new Date().toLocaleString());
+execution.setVariable('serveDateInISOFormat', new Date().toISOString());</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>WorkingTimeSequenceFlow</bpmn:incoming>
+      <bpmn:incoming>Flow_1da0wtp</bpmn:incoming>
+      <bpmn:outgoing>Flow_1f8f778</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="WorkingTimeSequenceFlow" name="working time" sourceRef="WorkingDayGateway" targetRef="SendServedEmailTask">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.getVariable('daytype') == "workday" &amp;&amp; execution.getVariable('weektype') == "weekday"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="OutOfOfficeHoursSequenceFlow" name="Out of office hours" sourceRef="WorkingDayGateway" targetRef="NextWorkingDayTask">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.getVariable('daytype') == "holiday" || execution.getVariable('weektype') != "weekday"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="EndEndEvent" name="end">
+      <bpmn:incoming>Flow_0zmq7m7</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1f8f778" sourceRef="SendServedEmailTask" targetRef="SaveProcessDataCallActivity" />
+    <bpmn:businessRuleTask id="NextWorkingDayTask" name="next working day" camunda:resultVariable="result" camunda:decisionRef="nextworkingday-key" camunda:mapDecisionResult="singleResult">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="weekday">${execution.getVariable('weektype')}</camunda:inputParameter>
+          <camunda:inputParameter name="workday">${execution.getVariable('daytype')}</camunda:inputParameter>
+          <camunda:outputParameter name="updated">${result.updated}</camunda:outputParameter>
+          <camunda:outputParameter name="daystoadd">${result.daystoadd}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1brc4bu</bpmn:incoming>
+      <bpmn:incoming>OutOfOfficeHoursSequenceFlow</bpmn:incoming>
+      <bpmn:outgoing>Flow_00pxn3a</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:exclusiveGateway id="WorkingDayIdentifiedGateway" name="Working Day identified ?">
+      <bpmn:incoming>Flow_00pxn3a</bpmn:incoming>
+      <bpmn:outgoing>NoSequenceFlow</bpmn:outgoing>
+      <bpmn:outgoing>YesSequenceFlow</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_00pxn3a" sourceRef="NextWorkingDayTask" targetRef="WorkingDayIdentifiedGateway">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">var system = java.lang.System;
 
-                        reviseddate.setDate(reviseddate.getDate()+daystoadd);
-                        reviseddate.setHours(8);
-                        reviseddate.setMinutes(0);
-                        reviseddate.setSeconds(10);
+system.out.println( " "+ new Date() + " : updated in next working day - " + updated);
 
-                        system.out.println( " "+ new Date() + " : Revised Date -" +
-                        reviseddate.toLocaleString());
-                        execution.setVariable('receiveddate',reviseddate.toString());
-                    </camunda:script>
-                </camunda:executionListener>
-            </bpmn:extensionElements>
-        </bpmn:sequenceFlow>
-        <bpmn:sequenceFlow id="NoSequenceFlow" name="No" sourceRef="WorkingDayIdentifiedGateway"
-            targetRef="CheckForHolidayTask1">
-            <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.getVariable('updated')
-                == true}</bpmn:conditionExpression>
-        </bpmn:sequenceFlow>
-        <bpmn:sequenceFlow id="YesSequenceFlow" name="Yes" sourceRef="WorkingDayIdentifiedGateway"
-            targetRef="WaitForBusinessDayEvent">
-            <bpmn:extensionElements>
-                <camunda:executionListener event="take">
-                    <camunda:script scriptFormat="javascript">var iso = new Date
-                        (receiveddate).toISOString();
-                        execution.setVariable('timerDate',iso);
-                    </camunda:script>
-                </camunda:executionListener>
-            </bpmn:extensionElements>
-            <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">
-                ${execution.getVariable('updated')==false}</bpmn:conditionExpression>
-        </bpmn:sequenceFlow>
-        <bpmn:businessRuleTask id="CheckForHolidayTask1" name="Check for holiday"
-            camunda:resultVariable="result" camunda:decisionRef="holidays-key"
-            camunda:mapDecisionResult="singleEntry">
-            <bpmn:extensionElements>
-                <camunda:inputOutput>
-                    <camunda:inputParameter name="datesubmitted">
-                        <camunda:script scriptFormat="javascript">var system = java.lang.System;
+system.out.println( " "+ new Date() + " : DaysToAdd in next working day -" +daystoadd); 
 
-                            var tempdate = new Date(receiveddate);
-                            var tempdatestring = tempdate.getFullYear()+"-"+("0" +
-                            (tempdate.getMonth() + 1)).slice(-2) +"-"+("0" +
-                            tempdate.getDate()).slice(-2);
+var reviseddate = new Date(receiveddate);
+system.out.println( " "+ new Date() + " : Revised date before change - " + reviseddate);
 
-                            system.out.println( " "+ new Date() + " tempdatestring UPDATED:" +
-                            tempdatestring );
+reviseddate.setDate(reviseddate.getDate()+daystoadd);
 
-                            tempdatestring; //return value
-                        </camunda:script>
-                    </camunda:inputParameter>
-                    <camunda:outputParameter name="daytype">${result}</camunda:outputParameter>
-                </camunda:inputOutput>
-            </bpmn:extensionElements>
-            <bpmn:incoming>NoSequenceFlow</bpmn:incoming>
-            <bpmn:outgoing>Flow_0vg6y5b</bpmn:outgoing>
-        </bpmn:businessRuleTask>
-        <bpmn:businessRuleTask id="CheckForWeekTypeTask1" name="Check for week type"
-            camunda:resultVariable="result" camunda:decisionRef="weektype-key"
-            camunda:mapDecisionResult="singleEntry">
-            <bpmn:extensionElements>
-                <camunda:inputOutput>
-                    <camunda:inputParameter name="inputhour">${execution.getVariable('inputhour')}</camunda:inputParameter>
-                    <camunda:inputParameter name="weekday">${execution.getVariable('daynumber')}</camunda:inputParameter>
-                    <camunda:outputParameter name="weektype">${result}</camunda:outputParameter>
-                </camunda:inputOutput>
-            </bpmn:extensionElements>
-            <bpmn:incoming>Flow_0vg6y5b</bpmn:incoming>
-            <bpmn:outgoing>Flow_1brc4bu</bpmn:outgoing>
-        </bpmn:businessRuleTask>
-        <bpmn:sequenceFlow id="Flow_0vg6y5b" sourceRef="CheckForHolidayTask1"
-            targetRef="CheckForWeekTypeTask1">
-            <bpmn:extensionElements>
-                <camunda:executionListener event="take">
-                    <camunda:script scriptFormat="javascript">var tempdate = new Date(receiveddate);
-                        execution.setVariable('daynumber',tempdate.getDay());
-                        execution.setVariable('inputhour',tempdate.getHours());
+reviseddate.setHours(8);
+reviseddate.setMinutes(0);
+reviseddate.setSeconds(10);
 
-                        var system = java.lang.System;
-                        system.out.println( " "+ new Date() + " : daytype in holiday2 -" + daytype);
-                        system.out.println( " "+ new Date() + " : daynumber[0..6] in flow - " +
-                        daynumber);
-                        system.out.println( " "+ new Date() + " : hour in flow - " + inputhour);</camunda:script>
-                </camunda:executionListener>
-            </bpmn:extensionElements>
-        </bpmn:sequenceFlow>
-        <bpmn:sequenceFlow id="Flow_1brc4bu" sourceRef="CheckForWeekTypeTask1"
-            targetRef="NextWorkingDayTask">
-            <bpmn:extensionElements>
-                <camunda:executionListener event="take">
-                    <camunda:script scriptFormat="javascript">var system = java.lang.System;
-                        system.out.println( " "+ new Date() + " : weektype in weektype2 - " +
-                        weektype);</camunda:script>
-                </camunda:executionListener>
-            </bpmn:extensionElements>
-        </bpmn:sequenceFlow>
-        <bpmn:intermediateCatchEvent id="WaitForBusinessDayEvent" name="Wait for Business Day">
-            <bpmn:extensionElements>
-                <camunda:executionListener event="start">
-                    <camunda:script scriptFormat="javascript">var system = java.lang.System;
-                        system.out.println ("Inside Wait Timer Task");
+system.out.println( " "+ new Date() + " : Revised Date -" + reviseddate.toLocaleString());
+
+execution.setVariable('receiveddate',reviseddate.toString());
+</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="NoSequenceFlow" name="No" sourceRef="WorkingDayIdentifiedGateway" targetRef="CheckForHolidayTask1">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.getVariable('updated') == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="YesSequenceFlow" name="Yes" sourceRef="WorkingDayIdentifiedGateway" targetRef="WaitForBusinessDayEvent">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">var iso = new Date (receiveddate).toISOString();
+execution.setVariable('timerDate',iso);
+</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.getVariable('updated')==false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:businessRuleTask id="CheckForHolidayTask1" name="Check for holiday" camunda:resultVariable="result" camunda:decisionRef="holidays-key" camunda:mapDecisionResult="singleEntry">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="datesubmitted">
+            <camunda:script scriptFormat="javascript">var system = java.lang.System;
+
+var tempdate = new Date(receiveddate);
+var tempdatestring = tempdate.getFullYear()+"-"+("0" + (tempdate.getMonth() + 1)).slice(-2) +"-"+("0" + tempdate.getDate()).slice(-2);
+
+system.out.println( " "+ new Date() + " tempdatestring UPDATED:" + tempdatestring );
+
+tempdatestring; //return value
+</camunda:script>
+          </camunda:inputParameter>
+          <camunda:outputParameter name="daytype">${result}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>NoSequenceFlow</bpmn:incoming>
+      <bpmn:outgoing>Flow_0vg6y5b</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:businessRuleTask id="CheckForWeekTypeTask1" name="Check for week type" camunda:resultVariable="result" camunda:decisionRef="weektype-key" camunda:mapDecisionResult="singleEntry">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="inputhour">${execution.getVariable('inputhour')}</camunda:inputParameter>
+          <camunda:inputParameter name="weekday">${execution.getVariable('daynumber')}</camunda:inputParameter>
+          <camunda:outputParameter name="weektype">${result}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0vg6y5b</bpmn:incoming>
+      <bpmn:outgoing>Flow_1brc4bu</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:sequenceFlow id="Flow_0vg6y5b" sourceRef="CheckForHolidayTask1" targetRef="CheckForWeekTypeTask1">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">var tempdate = new Date(receiveddate);
+execution.setVariable('daynumber',tempdate.getDay()); 
+execution.setVariable('inputhour',tempdate.getHours());
+
+var system = java.lang.System;
+system.out.println( " "+ new Date() + " : daytype in holiday2 -" + daytype);
+
+system.out.println( " "+ new Date() + " : daynumber[0..6] in flow - " + daynumber);
+system.out.println( " "+ new Date() + " : hour in flow - " + inputhour);</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1brc4bu" sourceRef="CheckForWeekTypeTask1" targetRef="NextWorkingDayTask">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">var system = java.lang.System;
+system.out.println( " "+ new Date() + " : weektype in weektype2 - " + weektype);</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:intermediateCatchEvent id="WaitForBusinessDayEvent" name="Wait for Business Day">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="start">
+          <camunda:script scriptFormat="javascript">var system = java.lang.System;
+system.out.println ("Inside Wait Timer Task");
 
 
-                    </camunda:script>
-                </camunda:executionListener>
-                <camunda:executionListener event="end">
-                    <camunda:script scriptFormat="javascript">var system = java.lang.System;
-                        system.out.println ("End Wait Timer Task");</camunda:script>
-                </camunda:executionListener>
-            </bpmn:extensionElements>
-            <bpmn:incoming>YesSequenceFlow</bpmn:incoming>
-            <bpmn:outgoing>Flow_1da0wtp</bpmn:outgoing>
-            <bpmn:timerEventDefinition id="TimerEventDefinition_1f5zmd3">
-                <bpmn:timeDate xsi:type="bpmn:tFormalExpression">${timerDate}</bpmn:timeDate>
-            </bpmn:timerEventDefinition>
-        </bpmn:intermediateCatchEvent>
-        <bpmn:sequenceFlow id="Flow_1da0wtp" sourceRef="WaitForBusinessDayEvent"
-            targetRef="SendServedEmailTask" />
-        <bpmn:callActivity id="SaveProcessDataCallActivity" name="Save process data"
-            calledElement="SaveRequestDataProcess">
-            <bpmn:documentation>(1) Call Subprocess to update document submission in central db
-                (2) set the http method to be used for API call (Listener)</bpmn:documentation>
-            <bpmn:extensionElements>
-                <camunda:in variables="all" />
-                <camunda:out variables="all" />
-                <camunda:in businessKey="#{execution.processBusinessKey}" />
-                <camunda:executionListener event="start">
-                    <camunda:script scriptFormat="javascript">execution.setVariable('method','PUT');
-                        var system = java.lang.System;
-                        system.out.println("*****Invoke save process data after served
-                        email*********");</camunda:script>
-                </camunda:executionListener>
-                <camunda:inputOutput>
-                    <camunda:inputParameter name="container">
-                        <camunda:script scriptFormat="javascript">var payload =
-                            execution.getVariable('container');
-                            var payloadObj = JSON.parse(payload);
-                            payloadObj.servedDate= new Date().toISOString();
+</camunda:script>
+        </camunda:executionListener>
+        <camunda:executionListener event="end">
+          <camunda:script scriptFormat="javascript">var system = java.lang.System;
+system.out.println ("End Wait Timer Task");</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>YesSequenceFlow</bpmn:incoming>
+      <bpmn:outgoing>Flow_1da0wtp</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1f5zmd3">
+        <bpmn:timeDate xsi:type="bpmn:tFormalExpression">${timerDate}</bpmn:timeDate>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_1da0wtp" sourceRef="WaitForBusinessDayEvent" targetRef="SendServedEmailTask" />
+    <bpmn:callActivity id="SaveProcessDataCallActivity" name="Save process data" calledElement="SaveRequestDataProcess">
+      <bpmn:documentation>(1) Call Subprocess to update document submission in central db
+(2) set the http method to be used for API call (Listener)</bpmn:documentation>
+      <bpmn:extensionElements>
+        <camunda:in variables="all" />
+        <camunda:out variables="all" />
+        <camunda:in businessKey="#{execution.processBusinessKey}" />
+        <camunda:executionListener event="start">
+          <camunda:script scriptFormat="javascript">execution.setVariable('method','PUT');
 
-                            //setting this to sync with form
-                            execution.setVariable('servedDate',payloadObj.servedDate);
+var system = java.lang.System;
+system.out.println("*****Invoke save process data after served email*********");</camunda:script>
+        </camunda:executionListener>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="container">
+            <camunda:script scriptFormat="javascript">var payload = execution.getVariable('container');
+var payloadObj = JSON.parse(payload);
+payloadObj.servedDate= new Date().toISOString();
 
-                            var payloadStr = JSON.stringify(payloadObj);
-                            var system = java.lang.System;
-                            system.out.println("******** Updated Request with servedDate inside
-                            VerifyServedDateProcess: - " + payloadStr);
-                            payloadStr; </camunda:script>
-                    </camunda:inputParameter>
-                </camunda:inputOutput>
-                <camunda:executionListener
-                    class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener"
-                    event="start" />
-            </bpmn:extensionElements>
-            <bpmn:incoming>Flow_1f8f778</bpmn:incoming>
-            <bpmn:outgoing>Flow_1df11r7</bpmn:outgoing>
-        </bpmn:callActivity>
-        <bpmn:sequenceFlow id="Flow_1df11r7" sourceRef="SaveProcessDataCallActivity"
-            targetRef="Event_11lqcgj" />
-        <bpmn:sequenceFlow id="Flow_0zmq7m7" sourceRef="Event_11lqcgj" targetRef="EndEndEvent" />
-        <bpmn:intermediateThrowEvent id="Event_11lqcgj" name="Notify Served Date Update">
-            <bpmn:extensionElements>
-                <camunda:executionListener event="start">
-                    <camunda:script scriptFormat="javascript">var system = java.lang.System;
-                        system.out.println(new Date() + "#########Sent Signal########");</camunda:script>
-                </camunda:executionListener>
-            </bpmn:extensionElements>
-            <bpmn:incoming>Flow_1df11r7</bpmn:incoming>
-            <bpmn:outgoing>Flow_0zmq7m7</bpmn:outgoing>
-            <bpmn:signalEventDefinition id="SignalEventDefinition_04gw6pm"
-                signalRef="Signal_0e2hb40" />
-        </bpmn:intermediateThrowEvent>
-    </bpmn:process>
-    <bpmn:signal id="Signal_0e2hb40" name="UpdateServedDate" />
-    <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="VerifyServedDateProcess">
-            <bpmndi:BPMNEdge id="Flow_0zmq7m7_di" bpmnElement="Flow_0zmq7m7">
-                <di:waypoint x="1088" y="177" />
-                <di:waypoint x="1112" y="177" />
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNEdge id="Flow_1df11r7_di" bpmnElement="Flow_1df11r7">
-                <di:waypoint x="1010" y="177" />
-                <di:waypoint x="1052" y="177" />
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNEdge id="Flow_1da0wtp_di" bpmnElement="Flow_1da0wtp">
-                <di:waypoint x="830" y="242" />
-                <di:waypoint x="830" y="217" />
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNEdge id="Flow_1brc4bu_di" bpmnElement="Flow_1brc4bu">
-                <di:waypoint x="580" y="410" />
-                <di:waypoint x="580" y="350" />
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNEdge id="Flow_0vg6y5b_di" bpmnElement="Flow_0vg6y5b">
-                <di:waypoint x="670" y="450" />
-                <di:waypoint x="630" y="450" />
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNEdge id="Flow_1nn077i_di" bpmnElement="YesSequenceFlow">
-                <di:waypoint x="720" y="285" />
-                <di:waypoint x="720" y="260" />
-                <di:waypoint x="812" y="260" />
-                <bpmndi:BPMNLabel>
-                    <dc:Bounds x="734" y="243" width="18" height="14" />
-                </bpmndi:BPMNLabel>
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNEdge id="Flow_0gwq4z0_di" bpmnElement="NoSequenceFlow">
-                <di:waypoint x="720" y="335" />
-                <di:waypoint x="720" y="410" />
-                <bpmndi:BPMNLabel>
-                    <dc:Bounds x="702" y="354" width="15" height="14" />
-                </bpmndi:BPMNLabel>
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNEdge id="Flow_00pxn3a_di" bpmnElement="Flow_00pxn3a">
-                <di:waypoint x="630" y="310" />
-                <di:waypoint x="695" y="310" />
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNEdge id="Flow_1f8f778_di" bpmnElement="Flow_1f8f778">
-                <di:waypoint x="880" y="177" />
-                <di:waypoint x="910" y="177" />
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNEdge id="Flow_17qvio6_di" bpmnElement="OutOfOfficeHoursSequenceFlow">
-                <di:waypoint x="580" y="202" />
-                <di:waypoint x="580" y="270" />
-                <bpmndi:BPMNLabel>
-                    <dc:Bounds x="585" y="221.00000000000006" width="90" height="14" />
-                </bpmndi:BPMNLabel>
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNEdge id="Flow_1tvqdk3_di" bpmnElement="WorkingTimeSequenceFlow">
-                <di:waypoint x="605" y="177" />
-                <di:waypoint x="780" y="177" />
-                <bpmndi:BPMNLabel>
-                    <dc:Bounds x="662" y="159" width="62" height="14" />
-                </bpmndi:BPMNLabel>
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNEdge id="Flow_13f5arp_di" bpmnElement="Flow_13f5arp">
-                <di:waypoint x="530" y="177" />
-                <di:waypoint x="555" y="177" />
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNEdge id="Flow_0itx03o_di" bpmnElement="Flow_0itx03o">
-                <di:waypoint x="370" y="177" />
-                <di:waypoint x="430" y="177" />
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNEdge id="Flow_1g4tyjv_di" bpmnElement="Flow_1g4tyjv">
-                <di:waypoint x="215" y="177" />
-                <di:waypoint x="270" y="177" />
-            </bpmndi:BPMNEdge>
-            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartStartEvent">
-                <dc:Bounds x="179" y="159" width="36" height="36" />
-                <bpmndi:BPMNLabel>
-                    <dc:Bounds x="185" y="202" width="25" height="14" />
-                </bpmndi:BPMNLabel>
-            </bpmndi:BPMNShape>
-            <bpmndi:BPMNShape id="Activity_1m1v8rs_di" bpmnElement="CheckForHolidayTask">
-                <dc:Bounds x="270" y="137" width="100" height="80" />
-            </bpmndi:BPMNShape>
-            <bpmndi:BPMNShape id="Activity_1yk16p3_di" bpmnElement="CheckForWeekTypeTask">
-                <dc:Bounds x="430" y="137" width="100" height="80" />
-            </bpmndi:BPMNShape>
-            <bpmndi:BPMNShape id="Gateway_0tdnq5m_di" bpmnElement="WorkingDayGateway"
-                isMarkerVisible="true">
-                <dc:Bounds x="555" y="152" width="50" height="50" />
-                <bpmndi:BPMNLabel>
-                    <dc:Bounds x="548" y="122" width="65" height="14" />
-                </bpmndi:BPMNLabel>
-            </bpmndi:BPMNShape>
-            <bpmndi:BPMNShape id="Activity_0lrf3zc_di" bpmnElement="SendServedEmailTask">
-                <dc:Bounds x="780" y="137" width="100" height="80" />
-            </bpmndi:BPMNShape>
-            <bpmndi:BPMNShape id="Event_0htwhtj_di" bpmnElement="EndEndEvent">
-                <dc:Bounds x="1112" y="159" width="36" height="36" />
-                <bpmndi:BPMNLabel>
-                    <dc:Bounds x="1121" y="202" width="19" height="14" />
-                </bpmndi:BPMNLabel>
-            </bpmndi:BPMNShape>
-            <bpmndi:BPMNShape id="Activity_0ydc1ii_di" bpmnElement="NextWorkingDayTask">
-                <dc:Bounds x="530" y="270" width="100" height="80" />
-            </bpmndi:BPMNShape>
-            <bpmndi:BPMNShape id="Gateway_0nhkjhr_di" bpmnElement="WorkingDayIdentifiedGateway"
-                isMarkerVisible="true">
-                <dc:Bounds x="695" y="285" width="50" height="50" />
-                <bpmndi:BPMNLabel>
-                    <dc:Bounds x="738" y="316" width="63" height="27" />
-                </bpmndi:BPMNLabel>
-            </bpmndi:BPMNShape>
-            <bpmndi:BPMNShape id="Activity_0yeq9w1_di" bpmnElement="CheckForHolidayTask1">
-                <dc:Bounds x="670" y="410" width="100" height="80" />
-            </bpmndi:BPMNShape>
-            <bpmndi:BPMNShape id="Activity_16cbx9i_di" bpmnElement="CheckForWeekTypeTask1">
-                <dc:Bounds x="530" y="410" width="100" height="80" />
-            </bpmndi:BPMNShape>
-            <bpmndi:BPMNShape id="Event_1q1f6wv_di" bpmnElement="WaitForBusinessDayEvent">
-                <dc:Bounds x="812" y="242" width="36" height="36" />
-                <bpmndi:BPMNLabel>
-                    <dc:Bounds x="788" y="285" width="85" height="27" />
-                </bpmndi:BPMNLabel>
-            </bpmndi:BPMNShape>
-            <bpmndi:BPMNShape id="Activity_0sabokw_di" bpmnElement="SaveProcessDataCallActivity">
-                <dc:Bounds x="910" y="137" width="100" height="80" />
-            </bpmndi:BPMNShape>
-            <bpmndi:BPMNShape id="Event_09tgth0_di" bpmnElement="Event_11lqcgj">
-                <dc:Bounds x="1052" y="159" width="36" height="36" />
-                <bpmndi:BPMNLabel>
-                    <dc:Bounds x="1037" y="202" width="67" height="27" />
-                </bpmndi:BPMNLabel>
-            </bpmndi:BPMNShape>
-        </bpmndi:BPMNPlane>
-    </bpmndi:BPMNDiagram>
+//setting this to sync with form
+execution.setVariable('servedDate',payloadObj.servedDate);
+
+var payloadStr = JSON.stringify(payloadObj);
+var system = java.lang.System;
+system.out.println("******** Updated Request with servedDate inside VerifyServedDateProcess: - " + payloadStr);
+payloadStr; </camunda:script>
+          </camunda:inputParameter>
+        </camunda:inputOutput>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="start" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1f8f778</bpmn:incoming>
+      <bpmn:outgoing>Flow_1df11r7</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_1df11r7" sourceRef="SaveProcessDataCallActivity" targetRef="Event_11lqcgj" />
+    <bpmn:sequenceFlow id="Flow_0zmq7m7" sourceRef="Event_11lqcgj" targetRef="EndEndEvent" />
+    <bpmn:intermediateThrowEvent id="Event_11lqcgj" name="Notify Served Date Update">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="start">
+          <camunda:script scriptFormat="javascript">var system = java.lang.System;
+system.out.println(new Date() + "#########Sent Signal########");</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1df11r7</bpmn:incoming>
+      <bpmn:outgoing>Flow_0zmq7m7</bpmn:outgoing>
+      <bpmn:signalEventDefinition id="SignalEventDefinition_1abby4d" signalRef="Signal_1daqonn" />
+    </bpmn:intermediateThrowEvent>
+  </bpmn:process>
+  <bpmn:signal id="Signal_0e2hb40" name="UpdateServedDate" />
+  <bpmn:message id="Message_0e6ph5m" name="UpdateServedDate-${applicationId}" />
+  <bpmn:signal id="Signal_1daqonn" name="UpdateServedDate-${applicationId}" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="VerifyServedDateProcess">
+      <bpmndi:BPMNEdge id="Flow_0zmq7m7_di" bpmnElement="Flow_0zmq7m7">
+        <di:waypoint x="1088" y="177" />
+        <di:waypoint x="1112" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1df11r7_di" bpmnElement="Flow_1df11r7">
+        <di:waypoint x="1010" y="177" />
+        <di:waypoint x="1052" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1da0wtp_di" bpmnElement="Flow_1da0wtp">
+        <di:waypoint x="830" y="242" />
+        <di:waypoint x="830" y="217" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1brc4bu_di" bpmnElement="Flow_1brc4bu">
+        <di:waypoint x="580" y="410" />
+        <di:waypoint x="580" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0vg6y5b_di" bpmnElement="Flow_0vg6y5b">
+        <di:waypoint x="670" y="450" />
+        <di:waypoint x="630" y="450" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1nn077i_di" bpmnElement="YesSequenceFlow">
+        <di:waypoint x="720" y="285" />
+        <di:waypoint x="720" y="260" />
+        <di:waypoint x="812" y="260" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="734" y="243" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0gwq4z0_di" bpmnElement="NoSequenceFlow">
+        <di:waypoint x="720" y="335" />
+        <di:waypoint x="720" y="410" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="702" y="354" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_00pxn3a_di" bpmnElement="Flow_00pxn3a">
+        <di:waypoint x="630" y="310" />
+        <di:waypoint x="695" y="310" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1f8f778_di" bpmnElement="Flow_1f8f778">
+        <di:waypoint x="880" y="177" />
+        <di:waypoint x="910" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17qvio6_di" bpmnElement="OutOfOfficeHoursSequenceFlow">
+        <di:waypoint x="580" y="202" />
+        <di:waypoint x="580" y="270" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="585" y="221.00000000000006" width="90" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1tvqdk3_di" bpmnElement="WorkingTimeSequenceFlow">
+        <di:waypoint x="605" y="177" />
+        <di:waypoint x="780" y="177" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="662" y="159" width="62" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13f5arp_di" bpmnElement="Flow_13f5arp">
+        <di:waypoint x="530" y="177" />
+        <di:waypoint x="555" y="177" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="507" y="159" width="71" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0itx03o_di" bpmnElement="Flow_0itx03o">
+        <di:waypoint x="370" y="177" />
+        <di:waypoint x="430" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1g4tyjv_di" bpmnElement="Flow_1g4tyjv">
+        <di:waypoint x="215" y="177" />
+        <di:waypoint x="270" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartStartEvent">
+        <dc:Bounds x="179" y="159" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="185" y="202" width="25" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1m1v8rs_di" bpmnElement="CheckForHolidayTask">
+        <dc:Bounds x="270" y="137" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1yk16p3_di" bpmnElement="CheckForWeekTypeTask">
+        <dc:Bounds x="430" y="137" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0tdnq5m_di" bpmnElement="WorkingDayGateway" isMarkerVisible="true">
+        <dc:Bounds x="555" y="152" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="548" y="122" width="65" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0lrf3zc_di" bpmnElement="SendServedEmailTask">
+        <dc:Bounds x="780" y="137" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0htwhtj_di" bpmnElement="EndEndEvent">
+        <dc:Bounds x="1112" y="159" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1121" y="202" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ydc1ii_di" bpmnElement="NextWorkingDayTask">
+        <dc:Bounds x="530" y="270" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0nhkjhr_di" bpmnElement="WorkingDayIdentifiedGateway" isMarkerVisible="true">
+        <dc:Bounds x="695" y="285" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="738" y="316" width="63" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0yeq9w1_di" bpmnElement="CheckForHolidayTask1">
+        <dc:Bounds x="670" y="410" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_16cbx9i_di" bpmnElement="CheckForWeekTypeTask1">
+        <dc:Bounds x="530" y="410" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1q1f6wv_di" bpmnElement="WaitForBusinessDayEvent">
+        <dc:Bounds x="812" y="242" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="788" y="285" width="85" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0sabokw_di" bpmnElement="SaveProcessDataCallActivity">
+        <dc:Bounds x="910" y="137" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0ilg6w2_di" bpmnElement="Event_11lqcgj">
+        <dc:Bounds x="1052" y="159" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1037" y="202" width="67" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </bpmn:definitions>

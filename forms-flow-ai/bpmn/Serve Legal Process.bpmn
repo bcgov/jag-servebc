@@ -5,13 +5,13 @@
       <bpmn:extensionElements>
         <camunda:executionListener event="start">
           <camunda:script scriptFormat="javascript">var system=java.lang.System;
-system.out.println(new Date() + " *********************************************************************************************************************");</camunda:script>
+system.out.println(new Date().toLocaleDateString() + " ::" + applicationId + ":: " + "New Submission ***************************");</camunda:script>
         </camunda:executionListener>
       </bpmn:extensionElements>
       <bpmn:outgoing>Flow_1teuejl</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_1teuejl" sourceRef="ReceiveDocumentsStartEvent" targetRef="SyncDataBetweenFormAndBpmTask1" />
-    <bpmn:userTask id="DocumentDocumentStatusTask" name="Document - ${documentStatus} - ${staffGroup}" camunda:candidateGroups="/formsflow/formsflow-reviewer/staff" camunda:dueDate="${serveDateInISOFormat}" camunda:followUpDate="${nextApperanceDateInISOFormat}">
+    <bpmn:userTask id="DocumentStatusStaffGroupTask" name="Document - ${documentStatus} - ${staffGroup}" camunda:candidateGroups="formsflow/formsflow-reviewer/staff" camunda:dueDate="${serveDateInISOFormat}" camunda:followUpDate="${nextApperanceDateInISOFormat}">
       <bpmn:documentation>User task
 (1) Create a new form instance to store updates (Listener)
 (2) When submitted it set the applicationStatus to the action and deleteReason to completd (Listener)</bpmn:documentation>
@@ -31,8 +31,9 @@ task.execution.setVariable('deleteReason', "completed");</camunda:script>
           <camunda:script scriptFormat="javascript">var payload = execution.getVariable('container');
 var payloadObj = JSON.parse(payload);
 var payloadStr = JSON.stringify(payloadObj);
-var system = java.lang.System;
-system.out.println(" New Request before Document Review Task: - " + payloadStr);</camunda:script>
+
+var system=java.lang.System;
+system.out.println(new Date().toLocaleDateString() + " ::" + applicationId + ":: " + "New Request before Document Review Task: - " + payloadStr);</camunda:script>
         </camunda:executionListener>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0cu1ux4</bpmn:incoming>
@@ -47,6 +48,12 @@ system.out.println(" New Request before Document Review Task: - " + payloadStr);
       <bpmn:outgoing>NoSequenceFlow</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:endEvent id="DocumentCompletedEndEvent" name="Document completed">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="start">
+          <camunda:script scriptFormat="javascript">var system=java.lang.System;
+system.out.println(new Date().toLocaleDateString() + " ::" + applicationId + ":: " + "Document Completed");</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_01og2hy</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="YesSequenceFlow" name="Yes" sourceRef="IsCompleteGateway" targetRef="SaveRequestDataCompletedCallActivity">
@@ -65,10 +72,8 @@ system.out.println(" New Request before Document Review Task: - " + payloadStr);
         <camunda:executionListener event="start">
           <camunda:script scriptFormat="javascript">execution.setVariable('method','POST');
 
-
 var system=java.lang.System;
-system.out.println(new Date() + " Container :" + container);
-</camunda:script>
+system.out.println(new Date().toLocaleDateString() + " ::" + applicationId + ":: " + "Save Initial Data");</camunda:script>
         </camunda:executionListener>
         <camunda:inputOutput>
           <camunda:inputParameter name="container">
@@ -94,7 +99,10 @@ payloadStr; </camunda:script>
         <camunda:out variables="all" />
         <camunda:in businessKey="#{execution.processBusinessKey}" />
         <camunda:executionListener event="start">
-          <camunda:script scriptFormat="javascript">execution.setVariable('method','PUT');</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('method','PUT');
+
+var system=java.lang.System;
+system.out.println(new Date().toLocaleDateString() + " ::" + applicationId + ":: " + "Save Working Data:" + container);</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="start" />
       </bpmn:extensionElements>
@@ -112,6 +120,10 @@ payloadStr; </camunda:script>
         <camunda:in variables="all" />
         <camunda:out variables="all" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="start" />
+        <camunda:executionListener event="start">
+          <camunda:script scriptFormat="javascript">var system=java.lang.System;
+system.out.println(new Date().toLocaleDateString() + " ::" + applicationId + ":: " + "Verify Served Date");</camunda:script>
+        </camunda:executionListener>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1nye5jf</bpmn:incoming>
       <bpmn:outgoing>Flow_16wo4op</bpmn:outgoing>
@@ -225,7 +237,7 @@ execution.setVariable('lawyerName',lawyerName);</camunda:script>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="end" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMDataPipelineListener" event="end" />
         <camunda:executionListener event="end">
-          <camunda:script scriptFormat="javascript">//Required for setting Task variable to show in LHS. dateSubmitted is set General tab.
+          <camunda:script scriptFormat="javascript">//Required for setting Task variable to show in LHS. dateSubmitted is set inside General tab.
 var payload = execution.getVariable('container');
 var payloadObj = JSON.parse(payload);
 var documentStatus="";
@@ -248,9 +260,6 @@ staffGroup=payloadObj.staffGroup;
 }
 if (payloadObj.partyName){
 partyName=payloadObj.partyName;
-}
-if (payloadObj.documentStatus){
-documentStatusTEST=payloadObj.documentStatus;
 }
 
 if(payloadObj.registry)
@@ -312,16 +321,7 @@ java.lang.System.out.println( " "+ new Date() + " : NEW SUBMISSION *************
 
 </bpmn:script>
     </bpmn:scriptTask>
-    <bpmn:sequenceFlow id="Flow_0yclemw" sourceRef="DocumentDocumentStatusTask" targetRef="SyncDataBetweenFormAndBpmTask">
-      <bpmn:extensionElements>
-        <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">var system=java.lang.System;
-system.out.println(new Date() + "**** After Task Completion formUrl:: " +execution.getVariable('formUrl'));
-
-system.out.println(new Date() + "**** After Task Completion container:: " +execution.getVariable('container'));</camunda:script>
-        </camunda:executionListener>
-      </bpmn:extensionElements>
-    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0yclemw" sourceRef="DocumentStatusStaffGroupTask" targetRef="SyncDataBetweenFormAndBpmTask" />
     <bpmn:callActivity id="SaveRequestDataCompletedCallActivity" name="Save request data (completed)" calledElement="SaveRequestDataProcess">
       <bpmn:documentation>(1) Call Subprocess to update document submission in central db
 (2) set the http method to be used for API call (Listener)</bpmn:documentation>
@@ -332,7 +332,8 @@ system.out.println(new Date() + "**** After Task Completion container:: " +execu
         <camunda:executionListener event="start">
           <camunda:script scriptFormat="javascript">execution.setVariable('method','PUT');
 
-</camunda:script>
+var system=java.lang.System;
+system.out.println(new Date().toLocaleDateString() + " ::" + applicationId + ":: " + "Save Final Data:" + container);</camunda:script>
         </camunda:executionListener>
         <camunda:inputOutput>
           <camunda:inputParameter name="container">
@@ -353,33 +354,34 @@ payloadStr; </camunda:script>
       <bpmn:outgoing>Flow_01og2hy</bpmn:outgoing>
     </bpmn:callActivity>
     <bpmn:sequenceFlow id="Flow_01og2hy" sourceRef="SaveRequestDataCompletedCallActivity" targetRef="DocumentCompletedEndEvent" />
-    <bpmn:sequenceFlow id="Flow_0cu1ux4" sourceRef="SaveRequestDataSaveCallActivity" targetRef="DocumentDocumentStatusTask" />
+    <bpmn:sequenceFlow id="Flow_0cu1ux4" sourceRef="SaveRequestDataSaveCallActivity" targetRef="DocumentStatusStaffGroupTask" />
     <bpmn:sequenceFlow id="Flow_06t4qph" sourceRef="SyncDataBetweenFormAndBpmTask" targetRef="IsCompleteGateway" />
-    <bpmn:sequenceFlow id="Flow_03b2zks" sourceRef="SaveRequestDataInitialCreateCallActivity" targetRef="Gateway_0492bpe" />
-    <bpmn:parallelGateway id="Gateway_0492bpe" name="Check Served Date in Parallel">
+    <bpmn:sequenceFlow id="Flow_03b2zks" sourceRef="SaveRequestDataInitialCreateCallActivity" targetRef="CheckServedDateInParallelGateway" />
+    <bpmn:parallelGateway id="CheckServedDateInParallelGateway" name="Check Served Date in Parallel">
       <bpmn:incoming>Flow_03b2zks</bpmn:incoming>
       <bpmn:outgoing>Flow_1q8i6z1</bpmn:outgoing>
       <bpmn:outgoing>Flow_1nye5jf</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:sequenceFlow id="Flow_1q8i6z1" sourceRef="Gateway_0492bpe" targetRef="DocumentDocumentStatusTask" />
-    <bpmn:sequenceFlow id="Flow_1nye5jf" sourceRef="Gateway_0492bpe" targetRef="VerifyServedDateCallActivity" />
-    <bpmn:endEvent id="Event_1skb6ed" name="End After Sending Email">
+    <bpmn:sequenceFlow id="Flow_1q8i6z1" sourceRef="CheckServedDateInParallelGateway" targetRef="DocumentStatusStaffGroupTask" />
+    <bpmn:sequenceFlow id="Flow_1nye5jf" sourceRef="CheckServedDateInParallelGateway" targetRef="VerifyServedDateCallActivity" />
+    <bpmn:endEvent id="EndAfterSendingEmailEndEvent" name="End After Sending Email">
       <bpmn:incoming>Flow_16wo4op</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_16wo4op" sourceRef="VerifyServedDateCallActivity" targetRef="Event_1skb6ed" />
-    <bpmn:boundaryEvent id="Event_0isfk7x" name="Serve Date update notification" attachedToRef="DocumentDocumentStatusTask">
+    <bpmn:sequenceFlow id="Flow_16wo4op" sourceRef="VerifyServedDateCallActivity" targetRef="EndAfterSendingEmailEndEvent" />
+    <bpmn:sequenceFlow id="Flow_0sq98vq" sourceRef="ServeDateUpdateNotificationBoundaryEvent" targetRef="DocumentStatusStaffGroupTask" />
+    <bpmn:boundaryEvent id="ServeDateUpdateNotificationBoundaryEvent" name="Serve Date update notification" attachedToRef="DocumentStatusStaffGroupTask">
       <bpmn:extensionElements>
         <camunda:executionListener event="start">
-          <camunda:script scriptFormat="javascript">var system = java.lang.System;
-system.out.println(new Date() + "#########Received Signal########");</camunda:script>
+          <camunda:script scriptFormat="javascript">var system=java.lang.System;
+system.out.println(new Date().toLocaleDateString() + " ::" + applicationId + ":: " + "#########Received UpdateServedDate-${applicationId} Signal########");</camunda:script>
         </camunda:executionListener>
       </bpmn:extensionElements>
       <bpmn:outgoing>Flow_0sq98vq</bpmn:outgoing>
-      <bpmn:signalEventDefinition id="SignalEventDefinition_1dzg8vw" signalRef="Signal_1gxsa4x" />
+      <bpmn:signalEventDefinition id="SignalEventDefinition_0479i73" signalRef="Signal_1gxsa4x" />
     </bpmn:boundaryEvent>
-    <bpmn:sequenceFlow id="Flow_0sq98vq" sourceRef="Event_0isfk7x" targetRef="DocumentDocumentStatusTask" />
   </bpmn:process>
-  <bpmn:signal id="Signal_1gxsa4x" name="UpdateServedDate" />
+  <bpmn:signal id="Signal_1gxsa4x" name="UpdateServedDate-${applicationId}" />
+  <bpmn:message id="Message_1xvixnx" name="UpdateServedDate-${applicationId}" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="ServeLegalProcess">
       <bpmndi:BPMNEdge id="Flow_0sq98vq_di" bpmnElement="Flow_0sq98vq">
@@ -462,10 +464,10 @@ system.out.println(new Date() + "#########Received Signal########");</camunda:sc
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="ReceiveDocumentsStartEvent">
         <dc:Bounds x="162" y="169" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="154" y="212" width="54" height="27" />
+          <dc:Bounds x="154" y="212" width="55" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1vbalmj_di" bpmnElement="DocumentDocumentStatusTask">
+      <bpmndi:BPMNShape id="Activity_1vbalmj_di" bpmnElement="DocumentStatusStaffGroupTask">
         <dc:Bounds x="490" y="147" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1kvc3fb_di" bpmnElement="IsCompleteGateway" isMarkerVisible="true">
@@ -498,19 +500,19 @@ system.out.println(new Date() + "#########Received Signal########");</camunda:sc
       <bpmndi:BPMNShape id="Activity_15wcxhj_di" bpmnElement="SaveRequestDataCompletedCallActivity">
         <dc:Bounds x="930" y="290" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_0dc1lws_di" bpmnElement="Gateway_0492bpe">
+      <bpmndi:BPMNShape id="Gateway_0dc1lws_di" bpmnElement="CheckServedDateInParallelGateway">
         <dc:Bounds x="505" y="315" width="50" height="50" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="542" y="356" width="75" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1skb6ed_di" bpmnElement="Event_1skb6ed">
+      <bpmndi:BPMNShape id="Event_1skb6ed_di" bpmnElement="EndAfterSendingEmailEndEvent">
         <dc:Bounds x="792" y="452" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="767" y="495" width="90" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0zunsnq_di" bpmnElement="Event_0isfk7x">
+      <bpmndi:BPMNShape id="Event_14kqqd1_di" bpmnElement="ServeDateUpdateNotificationBoundaryEvent">
         <dc:Bounds x="472" y="169" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="447" y="212" width="90" height="27" />

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" id="servebc-documenttype-mapping-id" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="4.8.1">
+  <decision id="servebc-documenttype-mapping" name="servebc-documenttype-mapping-name">
+    <decisionTable id="DecisionTable_0rxcm3z" hitPolicy="FIRST">
+      <input id="Input_1" label="docTypeCode" biodi:width="236">
+        <inputExpression id="InputExpression_1" typeRef="string">
+          <text>docTypeCode</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="documentType" name="documentType" typeRef="string" />
+      <rule id="DecisionRule_19x1z7x">
+        <inputEntry id="UnaryTests_1v05xdg">
+          <text>"NCQ"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_19lhmfu">
+          <text>"Notice of Constitutional Question"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_14yx1k8">
+        <inputEntry id="UnaryTests_0pfpnp8">
+          <text>"NOCC"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1xu6i92">
+          <text>"Notice of Civil Claim"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0k32x9g">
+        <inputEntry id="UnaryTests_1odbbrn">
+          <text>"PETN"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0e2kiqy">
+          <text>"Petition"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0g1ahf6">
+        <inputEntry id="UnaryTests_1ivi7td">
+          <text>"NOAPPEAL"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1vtraie">
+          <text>"Notice of Appeal"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0g7yx0u">
+        <inputEntry id="UnaryTests_16o72h6">
+          <text>"NOC"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_031r191">
+          <text>"Notice of Claim (Small Claims)"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_04x0b5l">
+        <inputEntry id="UnaryTests_14nn684">
+          <text>"NOAPPLN"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1pnb3b5">
+          <text>"Notice of Application"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0iz2r4x">
+        <inputEntry id="UnaryTests_196cdzp">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0ilgkqs">
+          <text>"Unknown"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="servebc-documenttype-mapping">
+        <dc:Bounds height="80" width="180" x="160" y="100" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
