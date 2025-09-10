@@ -52,7 +52,7 @@
           <text></text>
         </inputEntry>
         <inputEntry id="UnaryTests_1oxdbx8">
-          <text>&gt;16.0</text>
+          <text>&gt;17.0</text>
         </inputEntry>
         <inputEntry id="UnaryTests_0zqimps">
           <text>&lt;24.0</text>
@@ -70,7 +70,7 @@
           <text>&gt;= 0</text>
         </inputEntry>
         <inputEntry id="UnaryTests_025akm5">
-          <text>&lt;= 16.0</text>
+          <text>&lt;= 17.0</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_18428gq">
           <text>"weekday"</text>

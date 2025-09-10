@@ -115,12 +115,12 @@ mypayload;</camunda:script>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="SaveRequestDataProcess">
       <bpmndi:BPMNEdge id="Flow_091n8il_di" bpmnElement="Flow_091n8il">
-        <di:waypoint x="380" y="120" />
+        <di:waypoint x="382" y="120" />
         <di:waypoint x="490" y="120" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0dbbj54_di" bpmnElement="Flow_0dbbj54">
         <di:waypoint x="198" y="120" />
-        <di:waypoint x="280" y="120" />
+        <di:waypoint x="282" y="120" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0suj7s2_di" bpmnElement="Flow_0suj7s2">
         <di:waypoint x="590" y="120" />
@@ -132,9 +132,6 @@ mypayload;</camunda:script>
           <dc:Bounds x="157" y="145" width="48" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1e9gs3w_di" bpmnElement="GetOAuthTokenTask">
-        <dc:Bounds x="280" y="80" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0kbq5j8_di" bpmnElement="InvokeApiTask">
         <dc:Bounds x="490" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
@@ -143,6 +140,9 @@ mypayload;</camunda:script>
         <bpmndi:BPMNLabel>
           <dc:Bounds x="698" y="145" width="45" height="14" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1e9gs3w_di" bpmnElement="GetOAuthTokenTask">
+        <dc:Bounds x="282" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
