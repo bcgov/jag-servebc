@@ -74,6 +74,21 @@
           <text>true</text>
         </outputEntry>
       </rule>
+      <rule id="DecisionRule_1nr841p">
+        <description>If it is late evening on friday then move to next Monday</description>
+        <inputEntry id="UnaryTests_0kb0ncb">
+          <text>"workday"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04bhhtv">
+          <text>"weekend-friday"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0ja57pf">
+          <text>3</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1m466t6">
+          <text>true</text>
+        </outputEntry>
+      </rule>
       <rule id="DecisionRule_1de72on">
         <description>If it is during working day on a week day then do nothing.</description>
         <inputEntry id="UnaryTests_1w6h8cd">

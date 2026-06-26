@@ -1,15 +1,15 @@
 const session = require('express-session');
 
 // Create a session-store to be used by both the express-session
-// middleware and the keycloak middleware.
+// Middleware and the keycloak middleware.
 
 const memoryStore = new session.MemoryStore();
 
 const configuredSession = session({
-    secret: 'mySecret',
-    resave: false,
-    saveUninitialized: true,
-    store: memoryStore
+	secret: 'mySecret',
+	resave: false,
+	saveUninitialized: true,
+	store: memoryStore,
 });
 
-module.exports = { memoryStore, configuredSession } ;
+module.exports = {memoryStore, configuredSession};

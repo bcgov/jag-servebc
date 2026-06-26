@@ -1,42 +1,50 @@
-const { s3UploadFile, s3DownloadFile } = require('../s3/s3-service');
+const {Buffer} = require('node:buffer');
+const {getParameter} = require('../helpers.js');
+const {s3UploadFile, s3DownloadFile} = require('../s3/s3-service.js');
 
-
-removeFile = (req, res) => {
-    // Do not allow users to delete file, just return an "ok".
-    const fileId = req.params.fileId;
-    res.status(200).json({"fileId": fileId});
-}
-getFile = async (req, res) => {
-    const fileId = req.params.fileId;
-    const s3Response = await s3DownloadFile(fileId);
-
-    res.setHeader('Content-Type', s3Response.headers['content-type'])
-        .setHeader('Content-disposition', 'attachment;filename=' + req.query.originalName)
-        .setHeader('Content-Length', s3Response.data.length)
-        .send(Buffer.from(s3Response.data, 'binary'))
-}
-uploadFile = async (req, res) => {
-    const fileData = req.files.file.data;
-    const fileOriginalName = req.files.file.name; // original name
-    const fileSize = req.files.file.size;
-    const fileMimetype = req.files.file.mimetype;
-    const fileS3Name = req.body.name; // to be sent to s3
-
-    try {
-        const s3Resp = await s3UploadFile(fileS3Name, 
-                                    fileData, 
-                                    fileSize, 
-                                    fileMimetype);
-    } catch (error) {
-        res.status(500).send("Error while uploading file.");
-    }
-    res.status(201).json({
-        "status": "Ok",
-        "url": `https://${req.headers.host}/api/v1/files/${fileS3Name}?originalName=${fileOriginalName}`
-    });
+const remove = (request, response) => {
+	// Do not allow users to delete file, just return an "ok".
+	const id = getParameter(request);
+	response.status(200).json({id});
 };
+
+const getById = async (request, response) => {
+	const id = getParameter(request);
+	const s3Response = await s3DownloadFile(id);
+
+	response.setHeader('Content-Type', s3Response.headers['content-type'])
+		.setHeader('Content-disposition', 'attachment;filename=' + request.query.originalName)
+		.setHeader('Content-Length', s3Response.data.length)
+		.send(Buffer.from(s3Response.data, 'binary'));
+};
+
+const create = async (request, response) => {
+	const fileData = request.files.file.data;
+	const fileOriginalName = request.files.file.name; // Original name
+	const fileSize = request.files.file.size;
+	const fileMimetype = request.files.file.mimetype;
+	const fileS3Name = request.body.name; // To be sent to s3
+
+	try {
+		await s3UploadFile(fileS3Name, fileData, fileSize, fileMimetype);
+	} catch {
+		return response.status(500).send('Error while uploading file.');
+	}
+
+	response.status(201).json({
+		status: 'Ok',
+		url: `https://${request.headers.host}/api/v1/files/${fileS3Name}?originalName=${fileOriginalName}`,
+	});
+};
+
+// Formio probes GET /api/v1/files?baseUrl=...&project=...&form=... on form load
+const getAll = (_request, response) => response.status(200).json([]);
+
 module.exports = {
-    uploadFile,
-    getFile,
-    removeFile
-}
+	getAll,
+	create,
+	getById,
+	getById_auth: true,
+	remove,
+	remove_auth: true,
+};

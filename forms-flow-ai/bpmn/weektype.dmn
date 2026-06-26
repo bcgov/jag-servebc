@@ -4,7 +4,7 @@
     <decisionTable id="DecisionTable_0fvxpw0" hitPolicy="FIRST">
       <input id="Input_1" biodi:width="192">
         <inputExpression id="InputExpression_1" typeRef="integer">
-          <text>weekday</text>
+          <text>daynumber</text>
         </inputExpression>
       </input>
       <input id="InputClause_04ltpg1" biodi:width="150">
@@ -17,7 +17,7 @@
           <text>inputhour</text>
         </inputExpression>
       </input>
-      <output id="Output_1" name="daytype" typeRef="string" />
+      <output id="Output_1" name="weektype" typeRef="string" />
       <rule id="DecisionRule_158d77u">
         <inputEntry id="UnaryTests_1bsish9">
           <text>6</text>
@@ -44,6 +44,21 @@
         </inputEntry>
         <outputEntry id="LiteralExpression_1h75jvj">
           <text>"weekend-Sunday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1m6qd61">
+        <description>Friday evening</description>
+        <inputEntry id="UnaryTests_0mtkem1">
+          <text>5</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13pex40">
+          <text>&gt;17.0</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0nsyw0x">
+          <text>&lt;24.0</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1gh5mzt">
+          <text>"weekend-friday"</text>
         </outputEntry>
       </rule>
       <rule id="DecisionRule_0c2yd1a">

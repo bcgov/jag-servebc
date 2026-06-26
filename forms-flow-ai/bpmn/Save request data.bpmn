@@ -2,16 +2,7 @@
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0g2siwq" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.8.1" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.15.0">
   <bpmn:process id="SaveRequestDataProcess" name="save request data" isExecutable="true" camunda:versionTag="0.1">
     <bpmn:startEvent id="StartSaveStartEvent" name="start save">
-      <bpmn:extensionElements>
-        <camunda:executionListener event="start">
-          <camunda:script scriptFormat="javascript">//execution.setVariable('environment','LOCAL');
-
-
-
-</camunda:script>
-        </camunda:executionListener>
-      </bpmn:extensionElements>
-      <bpmn:outgoing>Flow_0dbbj54</bpmn:outgoing>
+      <bpmn:outgoing>flow_start_to_getauthtoken</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:serviceTask id="InvokeApiTask" name="Invoke api">
       <bpmn:extensionElements>
@@ -25,14 +16,17 @@ payloadObj.applicationId = applicationId;
 payloadObj.applicationStatus = applicationStatus;
 
 var payloadStr = JSON.stringify(payloadObj);
-var system = java.lang.System;
-system.out.println( execution.getVariable('method')+ " ::Updated Request at invoke api: - " + payloadStr);
+
+var Logger = org.slf4j.LoggerFactory;
+var logger = Logger.getLogger("BPMN_SCRIPT");
+var timestamp = new java.util.Date().toString();
+logger.debug("********* {} :: {} ::  payloadStr - {}", timestamp, applicationId, payloadStr);
+
 payloadStr; </camunda:script>
             </camunda:inputParameter>
             <camunda:inputParameter name="headers">
               <camunda:map>
                 <camunda:entry key="accept">application/json</camunda:entry>
-                <camunda:entry key="Access-Control-Allow-Origin">*</camunda:entry>
                 <camunda:entry key="Authorization">Bearer ${apitoken}</camunda:entry>
                 <camunda:entry key="Content-Type">application/json</camunda:entry>
               </camunda:map>
@@ -47,10 +41,14 @@ if (method == "PUT")
 {
 servedocumentFullUrl=servedocumentFullUrl.concat("?applicationId=",applicationId);
 }
-var system = java.lang.System;
-system.out.println ("servedocumentFullUrl : "+servedocumentFullUrl);
-var system = java.lang.System;
-system.out.println ("HTTP Method: "+method);
+
+
+var Logger = Java.type("org.slf4j.LoggerFactory");
+var logger = Logger.getLogger("BPMN_SCRIPT");
+var timestamp = new java.util.Date().toString();
+logger.debug("********* {} :: {} ::  servedocumentFullUrl - {}", timestamp, applicationId, servedocumentFullUrl);
+
+
 servedocumentFullUrl;</camunda:script>
             </camunda:inputParameter>
             <camunda:outputParameter name="result">${response}</camunda:outputParameter>
@@ -58,28 +56,34 @@ servedocumentFullUrl;</camunda:script>
           <camunda:connectorId>http-connector</camunda:connectorId>
         </camunda:connector>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_091n8il</bpmn:incoming>
-      <bpmn:outgoing>Flow_0suj7s2</bpmn:outgoing>
+      <bpmn:incoming>flow__getauthtoken_to_invokeapi</bpmn:incoming>
+      <bpmn:outgoing>flow_invokeapi_to_end</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="EndSaveEndEvent" name="end save">
       <bpmn:extensionElements>
         <camunda:executionListener event="start">
-          <camunda:script scriptFormat="javascript">java.lang.System.out.println ("Response :"  + result);</camunda:script>
+          <camunda:script scriptFormat="javascript">var logger = Java.type("org.slf4j.LoggerFactory").getLogger("BPMN_SCRIPT");
+var timestamp = new java.util.Date().toString();
+
+logger.debug("*********[Save Request Data] {} :: {} :: Response - ", timestamp, applicationId, result);</camunda:script>
         </camunda:executionListener>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0suj7s2</bpmn:incoming>
+      <bpmn:incoming>flow_invokeapi_to_end</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0suj7s2" sourceRef="InvokeApiTask" targetRef="EndSaveEndEvent" />
-    <bpmn:sequenceFlow id="Flow_0dbbj54" sourceRef="StartSaveStartEvent" targetRef="GetOAuthTokenTask" />
+    <bpmn:sequenceFlow id="flow_invokeapi_to_end" sourceRef="InvokeApiTask" targetRef="EndSaveEndEvent" />
+    <bpmn:sequenceFlow id="flow_start_to_getauthtoken" sourceRef="StartSaveStartEvent" targetRef="GetOAuthTokenTask" />
     <bpmn:serviceTask id="GetOAuthTokenTask" name="Get OAuth Token">
       <bpmn:extensionElements>
         <camunda:connector>
           <camunda:inputOutput>
             <camunda:inputParameter name="url">
               <camunda:script scriptFormat="javascript">var system=java.lang.System;
-var  urlKC = system.getenv('KEYCLOAK_URL');
-urlKC =urlKC.concat( "/auth/realms/forms-flow-ai/protocol/openid-connect/token");
-urlKC ;</camunda:script>
+var  urlKCBase = system.getenv('KEYCLOAK_URL');
+var keycloakRealm = system.getenv('KEYCLOAK_URL_REALM');
+
+var urlKCFull = `${urlKCBase}/auth/realms/${keycloakRealm}/protocol/openid-connect/token`;
+
+urlKCFull;</camunda:script>
             </camunda:inputParameter>
             <camunda:inputParameter name="method">POST</camunda:inputParameter>
             <camunda:inputParameter name="headers">
@@ -89,40 +93,34 @@ urlKC ;</camunda:script>
             </camunda:inputParameter>
             <camunda:inputParameter name="payload">
               <camunda:script scriptFormat="javascript">var system = java.lang.System;
-var clientSecret= system.getenv('KEYCLOAK_CLIENTSECRET');
-var clientId=system.getenv('KEYCLOAK_CLIENTID');
-var mypayload = ""; mypayload=mypayload.concat("grant_type=client_credentials&amp;client_id=",clientId,"&amp;client_secret=",clientSecret);
+var clientSecret = system.getenv("EMAIL_KEYCLOAK_CLIENT_SECRET");
+var clientId = system.getenv("EMAIL_KEYCLOAK_CLIENT_ID");
+
+var mypayload = `grant_type=client_credentials&amp;client_id=${clientId}&amp;client_secret=${clientSecret}`;
+
 mypayload;</camunda:script>
             </camunda:inputParameter>
             <camunda:outputParameter name="apitoken">${S(response).prop("access_token").value()}</camunda:outputParameter>
           </camunda:inputOutput>
           <camunda:connectorId>http-connector</camunda:connectorId>
         </camunda:connector>
-        <camunda:executionListener event="end">
-          <camunda:script scriptFormat="javascript">//var system = java.lang.System;
-//system.out.println( " "+ new Date() + " : OAuth Token -" + apitoken);
-
-
-
-</camunda:script>
-        </camunda:executionListener>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0dbbj54</bpmn:incoming>
-      <bpmn:outgoing>Flow_091n8il</bpmn:outgoing>
+      <bpmn:incoming>flow_start_to_getauthtoken</bpmn:incoming>
+      <bpmn:outgoing>flow__getauthtoken_to_invokeapi</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_091n8il" sourceRef="GetOAuthTokenTask" targetRef="InvokeApiTask" />
+    <bpmn:sequenceFlow id="flow__getauthtoken_to_invokeapi" sourceRef="GetOAuthTokenTask" targetRef="InvokeApiTask" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="SaveRequestDataProcess">
-      <bpmndi:BPMNEdge id="Flow_091n8il_di" bpmnElement="Flow_091n8il">
+      <bpmndi:BPMNEdge id="Flow_091n8il_di" bpmnElement="flow__getauthtoken_to_invokeapi">
         <di:waypoint x="382" y="120" />
         <di:waypoint x="490" y="120" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0dbbj54_di" bpmnElement="Flow_0dbbj54">
+      <bpmndi:BPMNEdge id="Flow_0dbbj54_di" bpmnElement="flow_start_to_getauthtoken">
         <di:waypoint x="198" y="120" />
         <di:waypoint x="282" y="120" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0suj7s2_di" bpmnElement="Flow_0suj7s2">
+      <bpmndi:BPMNEdge id="Flow_0suj7s2_di" bpmnElement="flow_invokeapi_to_end">
         <di:waypoint x="590" y="120" />
         <di:waypoint x="702" y="120" />
       </bpmndi:BPMNEdge>
