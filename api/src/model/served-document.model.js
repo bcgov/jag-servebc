@@ -106,7 +106,7 @@ function defineServedDocument(sequelize) {
 			field: 'court_number',
 		},
 		isCriminal: {
-			type: DataTypes.BOOLEAN,
+			type: DataTypes.STRING,
 			field: 'is_criminal',
 		},
 		nextAppearanceDate: {

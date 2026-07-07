@@ -75,7 +75,7 @@ module.exports = {
 				type: Sequelize.STRING,
 			},
 			is_criminal: {
-				type: Sequelize.BOOLEAN,
+				type: Sequelize.STRING,
 			},
 			next_appearance_date: {
 				type: Sequelize.DATE,
