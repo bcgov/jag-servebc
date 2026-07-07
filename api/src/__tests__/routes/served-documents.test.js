@@ -19,7 +19,7 @@ jest.mock('../../services/served-document.service.js', () => ({
 const {getById, getByQuery, create, updateByApplicationId, remove} = require('../../routes/served-documents.js');
 const {models} = require('../../model');
 const {resolvePostalCode, updateServedDocumentByApplicationId} = require('../../services/served-document.service.js');
-const {ValidationError, ValidationErrorItem} = require('sequelize');
+const {ValidationError, ValidationErrorItem, UniqueConstraintError} = require('sequelize');
 
 function mockRes() {
 	const res = {};
@@ -131,6 +131,35 @@ describe('create', () => {
 		await create({body: {firstName: 'Alice'}}, res);
 
 		expect(res.status).toHaveBeenCalledWith(400);
+	});
+
+	test('returns 409 when custom isUnique validator rejects duplicate applicationId', async () => {
+		const error = new ValidationError('Validation error', [
+			new ValidationErrorItem('ApplicationId already in use!', 'Validation error', 'applicationId', 42, null, 'isUnique'),
+		]);
+		models.servedDocument.create.mockRejectedValue(error);
+
+		const res = mockRes();
+		await create({body: {applicationId: 42}}, res);
+
+		expect(res.status).toHaveBeenCalledWith(409);
+		expect(res.send).toHaveBeenCalledWith({message: 'ApplicationId already in use!'});
+	});
+
+	test('returns 409 on Sequelize UniqueConstraintError', async () => {
+		const error = new UniqueConstraintError({
+			message: 'Validation error',
+			errors: [
+				new ValidationErrorItem('applicationId must be unique', 'unique violation', 'applicationId', 42),
+			],
+		});
+		models.servedDocument.create.mockRejectedValue(error);
+
+		const res = mockRes();
+		await create({body: {applicationId: 42}}, res);
+
+		expect(res.status).toHaveBeenCalledWith(409);
+		expect(res.send).toHaveBeenCalledWith({message: 'ApplicationId already in use!'});
 	});
 });
 

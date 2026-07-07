@@ -26,6 +26,11 @@ async function getByQuery(request, response) {
 	}
 }
 
+function isDuplicateApplicationIdError(error) {
+	return error instanceof Sequelize.UniqueConstraintError
+		|| (error instanceof Sequelize.ValidationError && error.errors.some(item => item.validatorKey === 'isUnique'));
+}
+
 async function create(request, response) {
 	if (request.body.id) {
 		return response.status(400).send('Bad request: ID should not be provided, since it is determined automatically by the database.');
@@ -44,6 +49,10 @@ async function create(request, response) {
 		);
 		response.status(201).json(persistedObject.dataValues);
 	} catch (error) {
+		if (isDuplicateApplicationIdError(error)) {
+			return response.status(409).send({message: 'ApplicationId already in use!'});
+		}
+
 		return error instanceof Sequelize.ValidationError ? response.status(422).send(error.errors) : response.status(400).send({message: error.message});
 	}
 }
