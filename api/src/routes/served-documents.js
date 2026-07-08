@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const {models} = require('../model');
 const {getParameter} = require('../helpers.js');
-const {resolvePostalCode, updateServedDocumentByApplicationId} = require('../services/served-document.service.js');
+const {resolvePostalCode, sanitizeEmptyDates, updateServedDocumentByApplicationId} = require('../services/served-document.service.js');
 
 async function getById(request, response) {
 	const id = getParameter(request);
@@ -37,7 +37,7 @@ async function create(request, response) {
 	}
 
 	try {
-		const body = resolvePostalCode(request.body);
+		const body = sanitizeEmptyDates(resolvePostalCode(request.body));
 		const persistedObject = await models.servedDocument.create(
 			body,
 			{

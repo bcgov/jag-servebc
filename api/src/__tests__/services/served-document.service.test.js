@@ -13,7 +13,7 @@ jest.mock('../../model', () => ({
 	transaction: jest.fn(async cb => cb({})),
 }));
 
-const {resolvePostalCode, getUpdatableFields, syncNotes} = require('../../services/served-document.service.js');
+const {resolvePostalCode, sanitizeEmptyDates, getUpdatableFields, syncNotes, updateServedDocumentByApplicationId} = require('../../services/served-document.service.js');
 const sequelize = require('../../model');
 const {models} = sequelize;
 
@@ -41,6 +41,31 @@ describe('resolvePostalCode', () => {
 		const body = {country: 'USA', postalCode: 'original', altPostalCode: 'swapped'};
 		resolvePostalCode(body);
 		expect(body.postalCode).toBe('original');
+	});
+});
+
+// ─── sanitizeEmptyDates ───────────────────────────────────────────────────────
+
+describe('sanitizeEmptyDates', () => {
+	test('converts empty-string date fields to null', () => {
+		const body = {nextAppearanceDate: '', servedDate: '', closedDate: ''};
+		expect(sanitizeEmptyDates(body)).toEqual({nextAppearanceDate: null, servedDate: null, closedDate: null});
+	});
+
+	test('leaves populated date fields unchanged', () => {
+		const body = {nextAppearanceDate: '2024-01-01', servedDate: null, closedDate: undefined};
+		expect(sanitizeEmptyDates(body)).toEqual(body);
+	});
+
+	test('leaves non-date fields unchanged', () => {
+		const body = {firstName: '', country: 'CANADA'};
+		expect(sanitizeEmptyDates(body)).toEqual(body);
+	});
+
+	test('does not mutate the original body', () => {
+		const body = {nextAppearanceDate: ''};
+		sanitizeEmptyDates(body);
+		expect(body.nextAppearanceDate).toBe('');
 	});
 });
 
@@ -122,5 +147,24 @@ describe('syncNotes', () => {
 
 		expect(models.note.update).toHaveBeenCalledTimes(1);
 		expect(models.note.create).toHaveBeenCalledTimes(1);
+	});
+});
+
+// ─── updateServedDocumentByApplicationId ───────────────────────────────────────
+
+describe('updateServedDocumentByApplicationId', () => {
+	test('sanitizes empty-string date fields before writing', async () => {
+		models.servedDocument.findOne
+			.mockResolvedValueOnce({id: 1})
+			.mockResolvedValueOnce({id: 1, nextAppearanceDate: null});
+		models.servedDocument.update.mockResolvedValue([1]);
+		models.note.destroy.mockResolvedValue(0);
+
+		await updateServedDocumentByApplicationId(42, {firstName: 'Alice', nextAppearanceDate: ''});
+
+		expect(models.servedDocument.update).toHaveBeenCalledWith(
+			expect.objectContaining({nextAppearanceDate: null}),
+			expect.anything(),
+		);
 	});
 });

@@ -16,6 +16,19 @@ function resolvePostalCode(body) {
 	return body;
 }
 
+const DATE_FIELDS = ['nextAppearanceDate', 'servedDate', 'closedDate'];
+
+function sanitizeEmptyDates(body) {
+	const sanitized = {...body};
+	for (const field of DATE_FIELDS) {
+		if (sanitized[field] === '') {
+			sanitized[field] = null;
+		}
+	}
+
+	return sanitized;
+}
+
 async function syncNotes(servedDocumentId, newNotes = [], transaction) {
 	const keepIds = newNotes.filter(n => n.id).map(n => n.id);
 
@@ -34,7 +47,8 @@ async function syncNotes(servedDocumentId, newNotes = [], transaction) {
 }
 
 // eslint-disable-next-line unicorn/prevent-abbreviations
-async function updateServedDocumentByApplicationId(applicationId, body) {
+async function updateServedDocumentByApplicationId(applicationId, rawBody) {
+	const body = sanitizeEmptyDates(rawBody);
 	return sequelize.transaction(async t => {
 		const updatableFields = getUpdatableFields(body);
 		const oldObject = await models.servedDocument.findOne({
@@ -77,6 +91,7 @@ async function updateServedDocumentByApplicationId(applicationId, body) {
 module.exports = {
 	getUpdatableFields,
 	resolvePostalCode,
+	sanitizeEmptyDates,
 	syncNotes,
 	updateServedDocumentByApplicationId,
 };
