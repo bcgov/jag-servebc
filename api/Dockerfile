@@ -19,10 +19,12 @@ RUN npm install
 # Copy the rest of your application code
 COPY . /api/
 
+RUN chmod +x /api/entrypoint.sh
+
 EXPOSE 3003
 
 # Run the container under the secure, unprivileged default node user
 USER node
 
-CMD ["node", "src/index.js"]
+ENTRYPOINT ["/api/entrypoint.sh"]
 
