@@ -18,7 +18,10 @@ function resolvePostalCode(body) {
 
 const DATE_FIELDS = ['nextAppearanceDate', 'servedDate', 'closedDate'];
 
-function sanitizeEmptyDates(body) {
+// Sequelize silently stringifies an empty-string DATE value as the literal
+// text "Invalid date" instead of throwing, which Postgres then rejects at
+// the driver level with an unhelpful error. Treat "" as "no value" instead.
+function nullifyEmptyDates(body) {
 	const sanitized = {...body};
 	for (const field of DATE_FIELDS) {
 		if (sanitized[field] === '') {
@@ -47,10 +50,10 @@ async function syncNotes(servedDocumentId, newNotes = [], transaction) {
 }
 
 // eslint-disable-next-line unicorn/prevent-abbreviations
-async function updateServedDocumentByApplicationId(applicationId, rawBody) {
-	const body = sanitizeEmptyDates(rawBody);
+async function updateServedDocumentByApplicationId(applicationId, body) {
 	return sequelize.transaction(async t => {
-		const updatableFields = getUpdatableFields(body);
+		const sanitizedBody = nullifyEmptyDates(body);
+		const updatableFields = getUpdatableFields(sanitizedBody);
 		const oldObject = await models.servedDocument.findOne({
 			where: {applicationId},
 			include: {all: true},
@@ -61,7 +64,7 @@ async function updateServedDocumentByApplicationId(applicationId, rawBody) {
 			return null;
 		}
 
-		const bodyWithId = {...body, id: oldObject.id};
+		const bodyWithId = {...sanitizedBody, id: oldObject.id};
 		const [updatedCount] = await models.servedDocument.update(bodyWithId, {
 			where: {applicationId},
 			fields: updatableFields,
@@ -91,7 +94,7 @@ async function updateServedDocumentByApplicationId(applicationId, rawBody) {
 module.exports = {
 	getUpdatableFields,
 	resolvePostalCode,
-	sanitizeEmptyDates,
+	nullifyEmptyDates,
 	syncNotes,
 	updateServedDocumentByApplicationId,
 };

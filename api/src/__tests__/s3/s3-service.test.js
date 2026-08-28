@@ -78,3 +78,46 @@ describe('s3DownloadFile', () => {
 		await expect(s3DownloadFile('missing.pdf')).rejects.toBe(error);
 	});
 });
+
+// ─── S3_USE_SSL ───────────────────────────────────────────────────────────────
+
+describe('S3_USE_SSL', () => {
+	afterEach(() => {
+		delete process.env.S3_USE_SSL;
+	});
+
+	test('defaults to https when S3_USE_SSL is unset', async () => {
+		jest.resetModules();
+		const freshAws4 = require('aws4');
+		const freshAxios = require('axios');
+		freshAws4.sign.mockImplementation(options => {
+			options.headers = {'X-Amz-Date': '20240101T000000Z', Authorization: 'mock-auth-header'};
+		});
+		freshAxios.mockResolvedValue({status: 200});
+		const {s3UploadFile: uploadWithDefault} = require('../../s3/s3-service.js');
+
+		await uploadWithDefault('doc.pdf', Buffer.from('data'), 4, 'application/pdf');
+
+		expect(freshAxios).toHaveBeenCalledWith(expect.objectContaining({
+			url: 'https://s3.example.com/test-bucket/doc.pdf',
+		}));
+	});
+
+	test('uses http when S3_USE_SSL=false', async () => {
+		process.env.S3_USE_SSL = 'false';
+		jest.resetModules();
+		const freshAws4 = require('aws4');
+		const freshAxios = require('axios');
+		freshAws4.sign.mockImplementation(options => {
+			options.headers = {'X-Amz-Date': '20240101T000000Z', Authorization: 'mock-auth-header'};
+		});
+		freshAxios.mockResolvedValue({status: 200});
+		const {s3UploadFile: uploadOverHttp} = require('../../s3/s3-service.js');
+
+		await uploadOverHttp('doc.pdf', Buffer.from('data'), 4, 'application/pdf');
+
+		expect(freshAxios).toHaveBeenCalledWith(expect.objectContaining({
+			url: 'http://s3.example.com/test-bucket/doc.pdf',
+		}));
+	});
+});

@@ -1,6 +1,13 @@
 const {Buffer} = require('node:buffer');
+const crypto = require('node:crypto');
+const path = require('node:path');
 const {getParameter} = require('../helpers.js');
 const {s3UploadFile, s3DownloadFile} = require('../s3/s3-service.js');
+
+const ALLOWED_EXTENSIONS = (process.env.UPLOAD_ALLOWED_EXTENSIONS || '.doc,.docx,.pdf,.zip,.jpg,.png')
+	.split(',')
+	.map(ext => ext.trim().toLowerCase())
+	.filter(Boolean);
 
 const remove = (request, response) => {
 	// Do not allow users to delete file, just return an "ok".
@@ -20,10 +27,23 @@ const getById = async (request, response) => {
 
 const create = async (request, response) => {
 	const fileData = request.files.file.data;
-	const fileOriginalName = request.files.file.name; // Original name
+	const fileOriginalName = request.files.file.name; // Original name — display only, never used as the S3 key
 	const fileSize = request.files.file.size;
 	const fileMimetype = request.files.file.mimetype;
-	const fileS3Name = request.body.name; // To be sent to s3
+
+	const extension = path.extname(fileOriginalName).toLowerCase();
+	if (!ALLOWED_EXTENSIONS.includes(extension)) {
+		return response.status(400).send(`File type '${extension || '(none)'}' is not allowed. Allowed types: ${ALLOWED_EXTENSIONS.join(', ')}.`);
+	}
+
+	// S3 key is always server-generated: a client can influence the readable
+	// prefix, but never the guid that guarantees uniqueness, so no request
+	// can be crafted to overwrite an existing object.
+	const safeBaseName = path
+		.basename(fileOriginalName, extension)
+		.replace(/[^a-zA-Z0-9._-]/g, '_')
+		.slice(0, 100);
+	const fileS3Name = `${safeBaseName}-${crypto.randomUUID()}${extension}`;
 
 	try {
 		await s3UploadFile(fileS3Name, fileData, fileSize, fileMimetype);

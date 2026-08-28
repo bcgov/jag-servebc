@@ -196,4 +196,18 @@ describe('CORS', () => {
 		const res = await request(app).get('/');
 		expect(res.status).toBe(200);
 	});
+
+	test('allows any origin when CORS_ORIGIN is *', async () => {
+		process.env.CORS_ORIGIN = '*';
+		jest.resetModules();
+		const wildcardApp = require('../app.js');
+
+		const res = await request(wildcardApp)
+			.get('/')
+			.set('Origin', 'https://any-site.example.com');
+		expect(res.status).toBe(200);
+
+		delete process.env.CORS_ORIGIN;
+		jest.resetModules();
+	});
 });

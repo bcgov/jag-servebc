@@ -3,7 +3,7 @@ jest.mock('../../s3/s3-service.js', () => ({
 	s3DownloadFile: jest.fn(),
 }));
 
-const {uploadFile, getFile, removeFile} = require('../../routes/files.js');
+const {create, getById, remove} = require('../../routes/files.js');
 const {s3UploadFile, s3DownloadFile} = require('../../s3/s3-service.js');
 
 function mockRes() {
@@ -17,23 +17,23 @@ function mockRes() {
 
 beforeEach(() => jest.clearAllMocks());
 
-// ─── removeFile ───────────────────────────────────────────────────────────────
+// ─── remove ───────────────────────────────────────────────────────────────────
 
-describe('removeFile', () => {
-	test('returns 200 with fileId without calling S3', () => {
+describe('remove', () => {
+	test('returns 200 with id without calling S3', () => {
 		const res = mockRes();
-		removeFile({params: {fileId: 'doc-abc.pdf'}}, res);
+		remove({params: {id: 'doc-abc.pdf'}}, res);
 
 		expect(res.status).toHaveBeenCalledWith(200);
-		expect(res.json).toHaveBeenCalledWith({fileId: 'doc-abc.pdf'});
+		expect(res.json).toHaveBeenCalledWith({id: 'doc-abc.pdf'});
 		expect(s3UploadFile).not.toHaveBeenCalled();
 		expect(s3DownloadFile).not.toHaveBeenCalled();
 	});
 });
 
-// ─── uploadFile ───────────────────────────────────────────────────────────────
+// ─── create ───────────────────────────────────────────────────────────────────
 
-describe('uploadFile', () => {
+describe('create', () => {
 	const baseRequest = {
 		files: {
 			file: {
@@ -43,37 +43,54 @@ describe('uploadFile', () => {
 				mimetype: 'application/pdf',
 			},
 		},
-		body: {name: 'stored-name.pdf'},
 		headers: {host: 'api.example.com'},
 	};
 
-	test('uploads file to S3 and returns 201 with url', async () => {
+	test('uploads file to S3 with a server-generated key and returns 201 with url', async () => {
 		s3UploadFile.mockResolvedValue({status: 200});
 
 		const res = mockRes();
-		await uploadFile(baseRequest, res);
+		await create(baseRequest, res);
 
-		expect(s3UploadFile).toHaveBeenCalledWith('stored-name.pdf', expect.anything(), 9, 'application/pdf');
+		expect(s3UploadFile).toHaveBeenCalledWith(
+			expect.stringMatching(/^original-[0-9a-f-]{36}\.pdf$/),
+			expect.anything(),
+			9,
+			'application/pdf',
+		);
 		expect(res.status).toHaveBeenCalledWith(201);
 		expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
 			status: 'Ok',
-			url: expect.stringContaining('stored-name.pdf'),
+			url: expect.stringContaining('originalName=original.pdf'),
 		}));
+	});
+
+	test('rejects a disallowed file extension with 400', async () => {
+		const request = {
+			...baseRequest,
+			files: {file: {...baseRequest.files.file, name: 'malware.exe'}},
+		};
+
+		const res = mockRes();
+		await create(request, res);
+
+		expect(res.status).toHaveBeenCalledWith(400);
+		expect(s3UploadFile).not.toHaveBeenCalled();
 	});
 
 	test('returns 500 when S3 upload fails', async () => {
 		s3UploadFile.mockRejectedValue(new Error('S3 unreachable'));
 
 		const res = mockRes();
-		await uploadFile(baseRequest, res);
+		await create(baseRequest, res);
 
 		expect(res.status).toHaveBeenCalledWith(500);
 	});
 });
 
-// ─── getFile ──────────────────────────────────────────────────────────────────
+// ─── getById ──────────────────────────────────────────────────────────────────
 
-describe('getFile', () => {
+describe('getById', () => {
 	test('downloads from S3 and streams the file to the response', async () => {
 		const s3Response = {
 			headers: {'content-type': 'application/pdf'},
@@ -82,7 +99,7 @@ describe('getFile', () => {
 		s3DownloadFile.mockResolvedValue(s3Response);
 
 		const res = mockRes();
-		await getFile({params: {fileId: 'doc-abc.pdf'}, query: {originalName: 'my-doc.pdf'}}, res);
+		await getById({params: {id: 'doc-abc.pdf'}, query: {originalName: 'my-doc.pdf'}}, res);
 
 		expect(s3DownloadFile).toHaveBeenCalledWith('doc-abc.pdf');
 		expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'application/pdf');

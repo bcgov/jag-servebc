@@ -13,13 +13,13 @@ jest.mock('../../model', () => ({
 
 jest.mock('../../services/served-document.service.js', () => ({
 	resolvePostalCode: jest.fn(body => body),
-	sanitizeEmptyDates: jest.fn(body => body),
+	nullifyEmptyDates: jest.fn(body => body),
 	updateServedDocumentByApplicationId: jest.fn(),
 }));
 
 const {getById, getByQuery, create, updateByApplicationId, remove} = require('../../routes/served-documents.js');
 const {models} = require('../../model');
-const {resolvePostalCode, sanitizeEmptyDates, updateServedDocumentByApplicationId} = require('../../services/served-document.service.js');
+const {resolvePostalCode, nullifyEmptyDates, updateServedDocumentByApplicationId} = require('../../services/served-document.service.js');
 const {ValidationError, ValidationErrorItem, UniqueConstraintError} = require('sequelize');
 
 function mockRes() {
@@ -109,7 +109,7 @@ describe('create', () => {
 		await create({body}, res);
 
 		expect(resolvePostalCode).toHaveBeenCalledWith(body);
-		expect(sanitizeEmptyDates).toHaveBeenCalledWith(body);
+		expect(nullifyEmptyDates).toHaveBeenCalledWith(body);
 		expect(res.status).toHaveBeenCalledWith(201);
 		expect(res.json).toHaveBeenCalledWith(persisted.dataValues);
 	});

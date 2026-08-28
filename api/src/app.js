@@ -22,8 +22,13 @@ const routes = {
 };
 
 // Enable files upload
+const uploadMaxFileSizeMb = Number(process.env.UPLOAD_MAX_FILE_SIZE_MB) || 20;
+
 app.use(fileUpload({
 	createParentPath: true,
+	limits: {fileSize: uploadMaxFileSizeMb * 1024 * 1024},
+	abortOnLimit: true,
+	responseOnLimit: `File too large. Maximum allowed size is ${uploadMaxFileSizeMb}MB.`,
 }));
 
 if (process.env.NODE_ENV !== 'production') {
@@ -34,7 +39,7 @@ const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split('
 
 app.use(cors({
 	origin(origin, callback) {
-		if (!origin || allowedOrigins.includes(origin)) {
+		if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
 			callback(null, true);
 		} else {
 			callback(new Error(`CORS blocked: ${origin}`));
@@ -99,14 +104,14 @@ app.use(audit({
 		excludeHeaders: ['*'], // Exclude '*' (all) header from requests
 		excludeBody: [''], // Exclude '' field from requests body
 		maskHeaders: [''], // Mask '' header in incoming requests
-		maxBodyLength: 50, // Limit length to 50 chars + '...'
+		maxBodyLength: 100, // Limit length to 100 chars + '...'
 	},
 	response: {
 		maskBody: [''], // Mask '' field in response body
 		excludeHeaders: ['*'], // Exclude all headers from responses,
 		excludeBody: [''], // Exclude '' body from responses
 		maskHeaders: [''], // Mask '' header in incoming requests
-		maxBodyLength: 50, // Limit length to 50 chars + '...'
+		maxBodyLength: 100, // Limit length to 100 chars + '...'
 		levels: {
 			'2xx': 'info', // All 2xx responses are info
 			'4xx': 'error', // All 4xx are error

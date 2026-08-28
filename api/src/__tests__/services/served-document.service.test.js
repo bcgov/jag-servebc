@@ -13,7 +13,7 @@ jest.mock('../../model', () => ({
 	transaction: jest.fn(async cb => cb({})),
 }));
 
-const {resolvePostalCode, sanitizeEmptyDates, getUpdatableFields, syncNotes, updateServedDocumentByApplicationId} = require('../../services/served-document.service.js');
+const {resolvePostalCode, nullifyEmptyDates, getUpdatableFields, syncNotes, updateServedDocumentByApplicationId} = require('../../services/served-document.service.js');
 const sequelize = require('../../model');
 const {models} = sequelize;
 
@@ -44,28 +44,28 @@ describe('resolvePostalCode', () => {
 	});
 });
 
-// ─── sanitizeEmptyDates ───────────────────────────────────────────────────────
+// ─── nullifyEmptyDates ────────────────────────────────────────────────────────
 
-describe('sanitizeEmptyDates', () => {
+describe('nullifyEmptyDates', () => {
 	test('converts empty-string date fields to null', () => {
 		const body = {nextAppearanceDate: '', servedDate: '', closedDate: ''};
-		expect(sanitizeEmptyDates(body)).toEqual({nextAppearanceDate: null, servedDate: null, closedDate: null});
+		expect(nullifyEmptyDates(body)).toEqual({nextAppearanceDate: null, servedDate: null, closedDate: null});
 	});
 
 	test('leaves populated date fields unchanged', () => {
-		const body = {nextAppearanceDate: '2024-01-01', servedDate: null, closedDate: undefined};
-		expect(sanitizeEmptyDates(body)).toEqual(body);
+		const body = {nextAppearanceDate: '2026-07-16T07:00:00.000Z'};
+		expect(nullifyEmptyDates(body).nextAppearanceDate).toBe('2026-07-16T07:00:00.000Z');
 	});
 
 	test('leaves non-date fields unchanged', () => {
-		const body = {firstName: '', country: 'CANADA'};
-		expect(sanitizeEmptyDates(body)).toEqual(body);
+		const body = {firstName: 'Alice', lawyerPhone: ''};
+		expect(nullifyEmptyDates(body)).toEqual(body);
 	});
 
 	test('does not mutate the original body', () => {
-		const body = {nextAppearanceDate: ''};
-		sanitizeEmptyDates(body);
-		expect(body.nextAppearanceDate).toBe('');
+		const body = {closedDate: ''};
+		nullifyEmptyDates(body);
+		expect(body.closedDate).toBe('');
 	});
 });
 

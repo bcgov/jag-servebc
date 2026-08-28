@@ -4,6 +4,43 @@
 		"name": "keycloak-test",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
+	"variable": [
+		{
+			"key": "keycloakBaseUrl",
+			"value": "https://forms-flow-idm-formsflow.127.0.0.1.nip.io",
+			"type": "string",
+			"description": "Self-signed cert — in Postman, turn off Settings > General > SSL certificate verification, or these requests will fail with a cert error."
+		},
+		{
+			"key": "keycloakRealm",
+			"value": "forms-flow-ai",
+			"type": "string"
+		},
+		{
+			"key": "keycloakClientId",
+			"value": "forms-flow-bpm",
+			"type": "string",
+			"description": "Must be a confidential client with Service Accounts enabled (forms-flow-web is public and can't do client_credentials). forms-flow-bpm's service account token already carries \"forms-flow-web\" as an audience via its formsflow-web-mapper, which is what servebc-api's verify-token-audience check requires."
+		},
+		{
+			"key": "keycloakClientSecret",
+			"value": "",
+			"type": "string",
+			"description": "Client secret for keycloakClientId — find it under Keycloak admin console > Clients > forms-flow-bpm > Credentials."
+		},
+		{
+			"key": "apiBaseUrl",
+			"value": "https://servebc-api-formsflow.127.0.0.1.nip.io",
+			"type": "string",
+			"description": "Self-signed cert — in Postman, turn off Settings > General > SSL certificate verification, or these requests will fail with a cert error."
+		},
+		{
+			"key": "applicationId",
+			"value": "1",
+			"type": "string",
+			"description": "servedDocuments.applicationId used by the example requests below."
+		}
+	],
 	"item": [
 		{
 			"name": "Logon",
@@ -32,37 +69,30 @@
 					"urlencoded": [
 						{
 							"key": "grant_type",
-							"value": "password",
+							"value": "client_credentials",
 							"type": "text"
 						},
 						{
 							"key": "client_id",
-							"value": "forms-flow-web",
+							"value": "{{keycloakClientId}}",
 							"type": "text"
 						},
 						{
-							"key": "username",
-							"value": "formsflow-client",
-							"type": "text"
-						},
-						{
-							"key": "password",
-							"value": "changeme",
+							"key": "client_secret",
+							"value": "{{keycloakClientSecret}}",
 							"type": "text"
 						}
 					]
 				},
 				"url": {
-					"raw": "http://localhost:8080/auth/realms/forms-flow-ai/protocol/openid-connect/token",
-					"protocol": "http",
+					"raw": "{{keycloakBaseUrl}}/auth/realms/{{keycloakRealm}}/protocol/openid-connect/token",
 					"host": [
-						"localhost"
+						"{{keycloakBaseUrl}}"
 					],
-					"port": "8080",
 					"path": [
 						"auth",
 						"realms",
-						"forms-flow-ai",
+						"{{keycloakRealm}}",
 						"protocol",
 						"openid-connect",
 						"token"
@@ -72,33 +102,202 @@
 			"response": []
 		},
 		{
-			"name": "Access User",
-			"request": {
-				"auth": {
-					"type": "noauth"
+			"name": "servebc-api",
+			"item": [
+				{
+					"name": "Healthcheck",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{apiBaseUrl}}/api/v1/healthcheck",
+							"host": [
+								"{{apiBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"healthcheck"
+							]
+						}
+					},
+					"response": []
 				},
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{access_token}}"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:3003/api/v1/user",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3003",
-					"path": [
-						"api",
-						"v1",
-						"user"
-					]
+				{
+					"name": "Get Served Document by applicationId",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{apiBaseUrl}}/api/v1/servedDocuments?applicationId={{applicationId}}",
+							"host": [
+								"{{apiBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"servedDocuments"
+							],
+							"query": [
+								{
+									"key": "applicationId",
+									"value": "{{applicationId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attachments",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{apiBaseUrl}}/api/v1/attachments",
+							"host": [
+								"{{apiBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"attachments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Notes by servedDocumentId",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{apiBaseUrl}}/api/v1/notes?servedDocumentId={{applicationId}}",
+							"host": [
+								"{{apiBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"notes"
+							],
+							"query": [
+								{
+									"key": "servedDocumentId",
+									"value": "{{applicationId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload File",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "name",
+									"value": "postman-test-upload.txt",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{apiBaseUrl}}/api/v1/files",
+							"host": [
+								"{{apiBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files"
+							]
+						},
+						"description": "This route currently has no auth requirement on servebc-api (a known gap) — the Authorization header is sent anyway so this request still works once that's fixed."
+					},
+					"response": []
+				},
+				{
+					"name": "Download File",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{apiBaseUrl}}/api/v1/files/postman-test-upload.txt?originalName=postman-test-upload.txt",
+							"host": [
+								"{{apiBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files",
+								"postman-test-upload.txt"
+							],
+							"query": [
+								{
+									"key": "originalName",
+									"value": "postman-test-upload.txt"
+								}
+							]
+						},
+						"description": "Depends on \"Upload File\" having been run first in the same collection run."
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		}
 	]
 }
