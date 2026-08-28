@@ -1,17 +1,17 @@
-# Legal Services Branch (LSB) - ServeBC
+# Legal Services Branch (LSB) - `Serve Legal Documents Portal`
 
 [![Lifecycle:Stable](https://img.shields.io/badge/Lifecycle-Maturing-007EC6)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-ServeBC is a specialized web application that allows members of the public or legal counsel to digitally serve one of six specific legal document types on the Attorney General of British Columbia entirely online. By automating the intake and tracking process, this platform replaces the requirement for physical, in-person legal service.
+`Serve Legal Documents Portal` is a specialized web application that allows members of the public or legal counsel to digitally serve one of six specific legal document types on the Attorney General of British Columbia entirely online. By automating the intake and tracking process, this platform replaces the requirement for physical, in-person legal service.
 
 ---
 
 ## Core System Architecture & Business Logic
 
-The system is built on top of the **formsflow.ai** framework, utilizing customized components to meet unique Legal Services Branch requirements:
+The system is built on top of the **formsflow.ai** framework (which is managed outside this repo), utilizing customized components to meet unique Legal Services Branch requirements:
 
-*   **Intake & UX Customization (`/form`):** Uses customized Form.io web components modified specifically to streamline the public intake experience and handle secure multi-document uploads.
+*   **Intake & UX Customization (`/form`):** Uses formsflow.ai based online form to streamline the public intake experience and handle secure multi-document uploads.
 *   **Business Rules Engine (`/bpmn`):** Orchestrates the legal validation flow using Camunda BPM. It automatically handles legal deadlines by calculating whether a submission arrived within legally-recognized business hours. If an intake happens after-hours or on a holiday, the workflow recalculates forward to the next valid business moment before firing the final confirmation.
 *   **Custom Business Logic Backend (`/api`):** A dedicated backend service managing application state, metadata transformation, and integration points.
 
