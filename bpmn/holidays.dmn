@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" xmlns:camunda="http://camunda.org/schema/1.0/dmn" id="holidays" name="holidays" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="4.8.1">
+  <decision id="holidays-key" name="holidays">
+    <decisionTable id="DecisionTable_0anzesd" hitPolicy="FIRST">
+      <input id="Input_1" biodi:width="212" camunda:inputVariable="receiveddate">
+        <inputExpression id="InputExpression_1" typeRef="string">
+          <text>datesubmitted</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" name="daytype" typeRef="string" />
+      <rule id="DecisionRule_2026_01">
+        <description>New Year 2026</description>
+        <inputEntry id="UnaryTests_2026_01">
+          <text>"2026-01-01"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2026_01">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2026_02">
+        <description>Family Day 2026</description>
+        <inputEntry id="UnaryTests_2026_02">
+          <text>"2026-02-16"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2026_02">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2026_03">
+        <description>Good Friday 2026</description>
+        <inputEntry id="UnaryTests_2026_03">
+          <text>"2026-04-03"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2026_03">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2026_04">
+        <description>Victoria Day 2026</description>
+        <inputEntry id="UnaryTests_2026_04">
+          <text>"2026-05-18"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2026_04">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2026_05">
+        <description>Canada Day 2026</description>
+        <inputEntry id="UnaryTests_2026_05">
+          <text>"2026-07-01"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2026_05">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2026_06">
+        <description>BC Day 2026</description>
+        <inputEntry id="UnaryTests_2026_06">
+          <text>"2026-08-03"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2026_06">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2026_07">
+        <description>Labour Day 2026</description>
+        <inputEntry id="UnaryTests_2026_07">
+          <text>"2026-09-07"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2026_07">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2026_08">
+        <description>National Day for Truth and Reconciliation 2026</description>
+        <inputEntry id="UnaryTests_2026_08">
+          <text>"2026-09-30"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2026_08">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2026_09">
+        <description>Thanksgiving Day 2026</description>
+        <inputEntry id="UnaryTests_2026_09">
+          <text>"2026-10-12"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2026_09">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2026_10">
+        <description>Remembrance Day 2026</description>
+        <inputEntry id="UnaryTests_2026_10">
+          <text>"2026-11-11"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2026_10">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2026_11">
+        <description>Christmas Day 2026</description>
+        <inputEntry id="UnaryTests_2026_11">
+          <text>"2026-12-25"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2026_11">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2027_01">
+        <description>New Year 2027</description>
+        <inputEntry id="UnaryTests_2027_01">
+          <text>"2027-01-01"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2027_01">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2027_02">
+        <description>Family Day 2027</description>
+        <inputEntry id="UnaryTests_2027_02">
+          <text>"2027-02-15"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2027_02">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2027_03">
+        <description>Good Friday 2027</description>
+        <inputEntry id="UnaryTests_2027_03">
+          <text>"2027-03-26"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2027_03">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2027_04">
+        <description>Victoria Day 2027</description>
+        <inputEntry id="UnaryTests_2027_04">
+          <text>"2027-05-24"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2027_04">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2027_05">
+        <description>Canada Day 2027</description>
+        <inputEntry id="UnaryTests_2027_05">
+          <text>"2027-07-01"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2027_05">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2027_06">
+        <description>BC Day 2027</description>
+        <inputEntry id="UnaryTests_2027_06">
+          <text>"2027-08-02"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2027_06">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2027_07">
+        <description>Labour Day 2027</description>
+        <inputEntry id="UnaryTests_2027_07">
+          <text>"2027-09-06"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2027_07">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2027_08">
+        <description>National Day for Truth and Reconciliation 2027</description>
+        <inputEntry id="UnaryTests_2027_08">
+          <text>"2027-09-30"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2027_08">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2027_09">
+        <description>Thanksgiving Day 2027</description>
+        <inputEntry id="UnaryTests_2027_09">
+          <text>"2027-10-11"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2027_09">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2027_10">
+        <description>Remembrance Day 2027</description>
+        <inputEntry id="UnaryTests_2027_10">
+          <text>"2027-11-11"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2027_10">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2027_11">
+        <description>Christmas Day 2027</description>
+        <inputEntry id="UnaryTests_2027_11">
+          <text>"2027-12-27"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2027_11">
+          <text>"holiday"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0g5y4az">
+        <inputEntry id="UnaryTests_0o6poyl">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_08pn15t">
+          <text>"workday"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="holidays-key">
+        <dc:Bounds height="80" width="180" x="160" y="100" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
