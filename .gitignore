@@ -1,7 +1,39 @@
+# ── API ──────────────────────────────────────────────────────────────────────
+api/.env
+api/node_modules/
+api/coverage/
+api/test_results/
+api/tmp/
+api/pid.txt
+/api/keycloak-*/
+npm-debug.log*
+
+# ── Forms Flow AI ─────────────────────────────────────────────────────────────
 forms-flow-ai/forms-flow-web/.env
+forms-flow-ai/forms-flow-web/*.onlylocal
+forms-flow-ai/forms-flow-web/public/config/
 forms-flow-ai/forms-flow-bpm/src/main/resources/templates/document-received.ftl
 forms-flow-ai/forms-flow-bpm/src/main/resources/templates/document-received.ftl:Zone.Identifier
 forms-flow-ai/forms-flow-bpm/src/main/resources/templates/document-served.ftl
 forms-flow-ai/forms-flow-bpm/src/main/resources/templates/document-served.ftl:Zone.Identifier
-api/.env
 
+# ── IDE and editor ────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+*.log
+*.orig
+*.gz
+*.tar
+*.tmp
+
+# ── Claude Code ───────────────────────────────────────────────────────────────
+.claude/settings.local.json
+CLAUDE.md

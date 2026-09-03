@@ -1,14 +1,13 @@
-const { format, createLogger, transports } = require("winston");
+const process = require('node:process');
+const {format, createLogger, transports} = require('winston');
 
-//const { combine, timestamp, label, printf } = format;
-const { combine, timestamp, printf, colorize, align } = format;
+const {combine, timestamp, printf, colorize, align} = format;
 
-//Using the printf format.
-const customFormat = printf(({ level, message, label, timestamp }) => {
+/* Using the printf format.
+const customFormat = printf(({level, message, label, timestamp}) => {
   return `${timestamp} ${level.toUpperCase()}: ${message}`;
 });
 
-/*
 const logger = createLogger({
   level: process.env.LOG_LEVEL || 'debug',
   format: combine(timestamp(), customFormat),
@@ -16,18 +15,16 @@ const logger = createLogger({
 });
 */
 const logger = createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: combine(
-    colorize({ all: true }),
-    timestamp({
-      format: 'YYYY-MM-DDThh:mm:ss.SSSZ',
-    }),
-    align(),
-    printf((info) => `[${info.timestamp}] ${info.level} ${info.message}`)
-  ),
-  transports: [new transports.Console()],
+	level: process.env.LOG_LEVEL || 'info',
+	format: combine(
+		colorize({all: true}),
+		timestamp({
+			format: 'YYYY-MM-DDThh:mm:ss.SSSZ',
+		}),
+		align(),
+		printf(info => `[${info.timestamp}] ${info.level} ${info.message}`),
+	),
+	transports: [new transports.Console()],
 });
-
-
 
 module.exports = logger;

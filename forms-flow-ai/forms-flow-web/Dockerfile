@@ -8,8 +8,8 @@ WORKDIR /web
 # add `/web/node_modules/.bin` to $PATH
 ENV PATH /web/node_modules/.bin:$PATH
 
-RUN apk update && apk upgrade && \
-  apk add --no-cache bash git openssh
+# This is a staging build. No need to upgrade the package.
+RUN apk add --no-cache bash git openssh
 
 ARG NODE_ENV
 ARG GENERATE_SOURCEMAP
@@ -34,61 +34,41 @@ ARG REACT_APP_USER_ACCESS_PERMISSIONS
 ARG REACT_APP_WEB_BASE_CUSTOM_URL
 ARG REACT_APP_FORMIO_JWT_SECRET
 
-ENV NODE_ENV ${NODE_ENV}
-ENV GENERATE_SOURCEMAP ${GENERATE_SOURCEMAP}
-ENV REACT_APP_CLIENT_ROLE ${REACT_APP_CLIENT_ROLE}
-ENV REACT_APP_STAFF_REVIEWER_ROLE ${REACT_APP_STAFF_REVIEWER_ROLE}
-ENV REACT_APP_STAFF_DESIGNER_ROLE ${REACT_APP_STAFF_DESIGNER_ROLE}
-ENV REACT_APP_CLIENT_ID ${REACT_APP_CLIENT_ID}
-ENV REACT_APP_STAFF_REVIEWER_ID ${REACT_APP_STAFF_REVIEWER_ID}
-ENV REACT_APP_STAFF_DESIGNER_ID ${REACT_APP_STAFF_DESIGNER_ID}
-ENV REACT_APP_USER_RESOURCE_FORM_ID ${REACT_APP_USER_RESOURCE_FORM_ID}
-ENV REACT_APP_API_SERVER_URL ${REACT_APP_API_SERVER_URL}
-ENV REACT_APP_API_PROJECT_URL ${REACT_APP_API_PROJECT_URL}
-ENV REACT_APP_KEYCLOAK_CLIENT ${REACT_APP_KEYCLOAK_CLIENT}
-ENV REACT_APP_ANONYMOUS_ID ${REACT_APP_ANONYMOUS_ID}
-ENV REACT_APP_WEB_BASE_URL ${REACT_APP_WEB_BASE_URL}
-ENV REACT_APP_CAMUNDA_API_URI ${REACT_APP_CAMUNDA_API_URI}
-ENV REACT_APP_WEBSOCKET_ENCRYPT_KEY ${REACT_APP_WEBSOCKET_ENCRYPT_KEY}
-ENV REACT_APP_KEYCLOAK_URL_REALM ${REACT_APP_KEYCLOAK_URL_REALM}
-ENV REACT_APP_KEYCLOAK_URL ${REACT_APP_KEYCLOAK_URL}
-ENV REACT_APP_APPLICATION_NAME ${REACT_APP_APPLICATION_NAME}
-ENV REACT_APP_USER_ACCESS_PERMISSIONS ${REACT_APP_USER_ACCESS_PERMISSIONS}
-ENV REACT_APP_WEB_BASE_CUSTOM_URL ${REACT_APP_WEB_BASE_CUSTOM_URL}
-ENV REACT_APP_FORMIO_JWT_SECRET ${REACT_APP_FORMIO_JWT_SECRET}
+# Set environment variables for React build (NOT persisted in final image)
+ENV NODE_ENV=${NODE_ENV}
+ENV GENERATE_SOURCEMAP=${GENERATE_SOURCEMAP}
 
 # Clone code
-RUN git clone -b ${FORMFLOW_SOURCE_REPO_BRANCH} ${FORMFLOW_SOURCE_REPO_URL} /tmp/forms-flow-ai/
-RUN cp -r /tmp/forms-flow-ai/forms-flow-web/. /web/
+RUN git clone -b ${FORMFLOW_SOURCE_REPO_BRANCH} ${FORMFLOW_SOURCE_REPO_URL} /tmp/forms-flow-ai/ && \
+    cp -r /tmp/forms-flow-ai/forms-flow-web/. /web/ && \
+    rm -rf /tmp/forms-flow-ai
 
-# Customizations
-ARG CUSTOM_SRC_DIR=src
-COPY ./  /tmp/${CUSTOM_SRC_DIR}/
-RUN cp -R /tmp/${CUSTOM_SRC_DIR}/* /web/ && rm -Rf /tmp/${CUSTOM_SRC_DIR}/
 
-ARG CUSTOM_PUBLIC_DIR=public
-COPY ./  /tmp/${CUSTOM_PUBLIC_DIR}/
-RUN cp -R /tmp/${CUSTOM_PUBLIC_DIR}/* /web/ && rm -Rf /tmp/${CUSTOM_PUBLIC_DIR}/
-
-# Install Dependencies 
+# Copy file to working dorectory
 COPY package.json ./
 
+# Install ALL dependencies
 RUN npm install --unsafe-perm --production
-# Copy code in the docker image (avoids npm install if no dependencies have changed)
-COPY . /web
+
+# Copy customizations (only after deps are installed to leverage caching)
+COPY src/ /web/src/
+COPY public/ /web/public/
+
+# Copy code in the docker image (avoids npm install if no dependencies have changed) -- Duplicate copy
+# COPY . /web
+
 # Build app
 RUN npm run build
 
 FROM artifacts.developer.gov.bc.ca/docker-remote/nginx:1.25.3-alpine as production-stage
 # FROM nginx:1.22 as production-stage
-RUN mkdir /nginx
+# RUN mkdir /nginx
 # Check for package updates
-RUN apk update && apk upgrade 
+#RUN apk update && apk upgrade 
 # Update vulnerable packages 
-#RUN apt-get install zlib1g=1:1.2.11.dfsg-2+deb11u2
-#RUN apt-get install libxslt1.1=1.1.34-4+deb11u1  
+#RUN apt-get install zlib1g=1:1.2.11.dfsg-2+deb11u2 && apt-get install libxslt1.1=1.1.34-4+deb11u1  
 
 COPY --from=build-stage /web/build /usr/share/nginx/html
 COPY --from=build-stage /web/nginx.conf /etc/nginx/nginx.conf
-EXPOSE 8080:8080
+EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]

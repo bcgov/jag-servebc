@@ -1,30 +1,30 @@
-# base image
-FROM artifacts.developer.gov.bc.ca/docker-remote/node:18.10-alpine as build-stage
+FROM node:24-alpine
 
-# set working directory
 WORKDIR /api
+ENV PATH="/api/node_modules/.bin:$PATH"
 
-# add `/api/node_modules/.bin` to $PATH
-ENV PATH /api/node_modules/.bin:$PATH
+# Copy only dependency trackers to leverage Docker build cache
+COPY package*.json /api/
 
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
+# Run a conditional check: install curl ONLY if NODE_ENV is NOT production '--build-arg NODE_ENV=development'
+RUN if [ "$NODE_ENV" != "production" ]; then \
+        apk add --no-cache curl; \
+    fi
+
+RUN npm install 
+
+# Copy the rest of your application code
 COPY . /api/
 
-RUN apk update && apk add busybox-extras
+RUN chmod +x /api/entrypoint.sh
 
-#RUN wget https://download.microsoft.com/download/e/4/e/e4e67866-dffd-428c-aac7-8d28ddafb39b/msodbcsql17_17.9.1.1-1_amd64.apk
-#RUN wget https://download.microsoft.com/download/e/4/e/e4e67866-dffd-428c-aac7-8d28ddafb39b/mssql-tools_17.9.1.1-1_amd64.apk
-#RUN apk add --allow-untrusted msodbcsql17_17.9.1.1-1_amd64.apk
-#RUN apk add --allow-untrusted mssql-tools_17.9.1.1-1_amd64.apk
+EXPOSE 3003
 
-#Install curl
-#RUN apk add curl
-
-#RUN apk add unixodbc-dev
-
-RUN npm install
-
-# RUN node src/sqlite-example-database/setup.js
-
-EXPOSE 3003:3003
+# Run the container under the secure, unprivileged default node user
 USER node
-CMD ["node", "src/index.js"]
+
+ENTRYPOINT ["/api/entrypoint.sh"]
+

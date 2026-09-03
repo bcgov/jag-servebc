@@ -1,19 +1,21 @@
-async function healthcheck(req, res) {
-    const healthcheck = {
-        uptime: process.uptime(),
-        message: 'OK',
-        timestamp: Date.now()
-    };
-    try {
-        res.send(healthcheck);
-    } catch (error) {
-        healthcheck.message = error;
-        res.status(503).send();
-    }
-};
+const process = require('node:process');
 
-// export router with all routes included
+async function healthcheck(request, response) {
+	const healthcheckData = {
+		uptime: process.uptime(),
+		message: 'OK',
+		timestamp: Date.now(),
+	};
+	try {
+		response.send(healthcheckData);
+	} catch (error) {
+		healthcheckData.message = error;
+		response.status(503).send();
+	}
+}
+
+// Export router with all routes included
 module.exports = {
-	"allAuth": false,
-	healthcheck
+	allAuth: false,
+	healthcheck,
 };

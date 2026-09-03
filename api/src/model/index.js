@@ -1,32 +1,28 @@
-const { Sequelize } = require('sequelize');
-const { applyExtraSetup } = require('./extra-setup');
-const logger = require("../logger");
+const process = require('node:process');
+const {Sequelize} = require('sequelize');
+const logger = require('../logger.js');
+const {applyExtraSetup} = require('./extra-setup.js');
 require('dotenv').config();
 
-// const sequelize = new Sequelize({
-// 	dialect: 'sqlite',
-// 	storage: 'sqlite-example-database/example-db.sqlite',
-// 	logQueryParameters: true,
-// 	benchmark: true
-// });
-
-const DB_NAME = process.env.DB_NAME;
-const DB_USERNAME = process.env.DB_USERNAME;
-const DB_PASSWORD = process.env.DB_PASSWORD;
-const DB_HOST = process.env.DB_HOST;
-const DB_PORT = process.env.DB_PORT;
-const DB_USE_POSTGRES = process.env.DB_USE_POSTGRES;
+const {
+	DB_NAME,
+	DB_USERNAME,
+	DB_PASSWORD,
+	DB_HOST,
+	DB_PORT,
+	DB_USE_POSTGRES,
+} = process.env;
 
 let sequelize = null;
 
-if (DB_USE_POSTGRES==="true") {
+if (DB_USE_POSTGRES === 'true') {
 	logger.info('[api.db.init.model] Connecting to Postgres DB ', DB_NAME);
 	sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
 		host: DB_HOST,
 		port: DB_PORT,
 		dialect: 'postgres',
-		logging: false
-	})
+		logging: false,
+	});
 } else {
 	logger.info('[api.db.init.model] Connecting to MSSQL DB ', DB_NAME);
 	sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
@@ -34,19 +30,15 @@ if (DB_USE_POSTGRES==="true") {
 		port: DB_PORT,
 		dialect: 'mssql',
 		dialectOptions: {
-		  options: {
-			// useUTC: false,
-			// dateFirst: 1,
-		  }
-		}
-	})
+			options: {},
+		},
+	});
 }
 
-
 const modelDefiners = [
-	require('./attachment.model'),
-	require('./note.model'),
-	require('./served-document.model'),
+	require('./attachment.model.js'),
+	require('./note.model.js'),
+	require('./served-document.model.js'),
 	// Add more models here...
 	// require('./models/item'),
 ];

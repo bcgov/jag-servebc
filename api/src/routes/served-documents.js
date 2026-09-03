@@ -1,162 +1,96 @@
 const Sequelize = require('sequelize');
-const { models } = require('../model');
-const { getIdParam } = require('../helpers');
-const Op = Sequelize.Op;
+const {models} = require('../model');
+const {getParameter} = require('../helpers.js');
+const {resolvePostalCode, nullifyEmptyDates, updateServedDocumentByApplicationId} = require('../services/served-document.service.js');
 
-async function getById(req, res) {
-	const id = getIdParam(req);
-	const servedDocument = await models.servedDocument.findByPk(id, { include: { all: true }});
+async function getById(request, response) {
+	const id = getParameter(request);
+	const servedDocument = await models.servedDocument.findByPk(id, {include: {all: true}});
 	if (servedDocument) {
-		res.status(200).json(servedDocument);
+		response.status(200).json(servedDocument);
 	} else {
-		res.status(404).send('404 - Not found');
+		response.status(404).send('404 - Not found');
 	}
-};
+}
 
-async function getByQuery(req, res) {
-	if (req.query.applicationId) {
-		const servedDocument = await models.servedDocument.findOne({ where: { applicationId: req.query.applicationId } , include: { all: true }});
+async function getByQuery(request, response) {
+	if (request.query.applicationId) {
+		const servedDocument = await models.servedDocument.findOne({where: {applicationId: request.query.applicationId}, include: {all: true}});
 		if (servedDocument) {
-			res.status(200).json(servedDocument);
+			response.status(200).json(servedDocument);
 		} else {
-			res.status(404).send('404 - Not found');
+			response.status(404).send('404 - Not found');
 		}
-	} else getAll(req, res)
-};
-
-async function create(req, res) {
-	if (req.body.id) {
-		res.status(400).send(`Bad request: ID should not be provided, since it is determined automatically by the database.`)
 	} else {
-		// Logic to deal with masked/unmasked field in formio
-		if (req.body.country.toUpperCase() !== 'CANADA') {
-			req.body.postalCode = req.body.altPostalCode;
-		}
+		response.status(400).send('Bad request: applicationId query parameter is required.');
+	}
+}
 
-		try {
-			const persistedObj = await models.servedDocument.create(req.body, 
-			{	
+function isDuplicateApplicationIdError(error) {
+	return error instanceof Sequelize.UniqueConstraintError
+		|| (error instanceof Sequelize.ValidationError && error.errors.some(item => item.validatorKey === 'isUnique'));
+}
+
+async function create(request, response) {
+	if (request.body.id) {
+		return response.status(400).send('Bad request: ID should not be provided, since it is determined automatically by the database.');
+	}
+
+	try {
+		const body = nullifyEmptyDates(resolvePostalCode(request.body));
+		const persistedObject = await models.servedDocument.create(
+			body,
+			{
 				include: [
-					{ model: models.attachment }, 
-					{ model: models.note }
-				] 
-			} );
-			res.status(201).json(persistedObj.dataValues);            
-        } catch(e) {
-            if (e instanceof Sequelize.ValidationError) {
-				return res.status(422).send(e.errors);
-			} else {
-				return res.status(400).send({
-					message: e.message
-				});
-			}
-        };
-	}
-};
-
-
-function getUpdatableFields(fullObj) {
-	const fieldsToExclude = ['id', 'applicationId']; 
-	return Object.keys(fullObj).filter( s => !fieldsToExclude.includes(s))
-}
-
-async function updateByApplicationId(req, res) {
-	if (req.query.applicationId) { 
-		
-		const updatableFields = getUpdatableFields(req.body)
-		try {
-			const oldObj = await models.servedDocument.findOne({ where: { applicationId: req.query.applicationId } , include: { all: true }});
-			if (oldObj) {
-				req.body.id = oldObj.id;
-				const updatedRows = await models.servedDocument.update(req.body, {
-					where: {
-						applicationId: req.query.applicationId
-					},
-					fields: updatableFields
-				});
-				if (updatedRows[0] > 0) {
-					await updateNotes(req);
-					const updatedObj = await models.servedDocument.findOne({ where: { applicationId: req.query.applicationId } , include: { all: true }});
-					if (updatedObj) {
-						res.status(200).json(updatedObj);
-					} 
-				} else {
-					res.status(500).send('Internal error');
-				}
-			} else {
-				res.status(404).send('404 - Not found');
-			}
-		} catch (e) {
-			if (e instanceof Sequelize.ValidationError) {
-				return res.status(422).send(e.errors);
-			} else {
-				return res.status(400).send({
-					message: e.message
-				});
-			}
+					{model: models.attachment},
+					{model: models.note},
+				],
+			},
+		);
+		response.status(201).json(persistedObject.dataValues);
+	} catch (error) {
+		if (isDuplicateApplicationIdError(error)) {
+			return response.status(409).send({message: 'ApplicationId already in use!'});
 		}
-	} else {
-		res.status(400).send(`Bad request: applicationId query required.`);
+
+		return error instanceof Sequelize.ValidationError ? response.status(422).send(error.errors) : response.status(400).send({message: error.message});
 	}
 }
 
-async function updateNotes(req) {
-	const id = req.body.id;
-	const newNotes = req.body.notes || [];
-		
-	const newNotesIds = newNotes.map(note => note.id);
-	const oldNotes = await models.note.findAll({
-		where: {
-			servedDocumentId: id 
-		}
-	});
-	const oldNotesIds = oldNotes.map(note => note.id)
+// eslint-disable-next-line unicorn/prevent-abbreviations
+async function updateByApplicationId(request, response) {
+	if (!request.query.applicationId) {
+		return response.status(400).send('Bad request: applicationId is required.');
+	}
 
-	const deletedNotes = oldNotesIds.filter(x => !newNotesIds.includes(x));
-	const addedNotes = newNotesIds.filter(x => !oldNotesIds.includes(x));
-	const updatedNotes = newNotesIds.filter(x => oldNotesIds.includes(x));
-	
-	oldNotes.forEach(async n => {
-		if (deletedNotes.includes(n.id)) {
-			await models.note.destroy({
-				where: {
-					id: n.id
-				}
-			});
+	try {
+		const updatedObject = await updateServedDocumentByApplicationId(
+			request.query.applicationId,
+			request.body,
+		);
+		if (updatedObject === null) {
+			return response.status(404).send('404 - Not found');
 		}
-	});
-	newNotes.forEach(async n => {
-		if (addedNotes.includes(n.id)) {
-			n.servedDocumentId = id;
-			await models.note.create(n);
-		}
-	});
-	newNotes.forEach(async n => {
-		if (updatedNotes.includes(n.id)) {
-			n.servedDocumentId = id;
-			await models.note.update(n, {
-				where: {
-					id: n.id
-				}
-			});
-		}
-	});
+
+		response.status(200).json(updatedObject);
+	} catch (error) {
+		return error instanceof Sequelize.ValidationError
+			? response.status(422).send(error.errors)
+			: response.status(500).send({message: error.message});
+	}
 }
-async function remove(req, res) {
-	const id = getIdParam(req);
-	await models.servedDocument.destroy({
-		where: {
-			id: id
-		}
-	});
-	res.status(200).end();
-};
+
+async function remove(request, response) {
+	const id = getParameter(request);
+	await models.servedDocument.destroy({where: {id}});
+	response.status(200).end();
+}
 
 module.exports = {
-	"allAuth": true,
+	allAuth: true,
 	getById,
 	getByQuery,
 	create,
 	updateByApplicationId,
-	remove
+	remove,
 };

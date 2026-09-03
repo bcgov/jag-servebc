@@ -95,13 +95,13 @@ const Filters = (props) => {
       }
       // If the user selected the "Document Type" filter
       // Format the display of the "noticeOfConstitutionalQuestionAndSupportingDocuments" label correctly
-    } else if (
+    } /*else if (
       x.label === "Document Type" &&
       x.value === "noticeOfConstitutionalQuestionAndSupportingDocuments"
     ) {
       return renderContent(x, "NCQ", index);
       // Display the filter normally
-    } else {
+    } */else {
       return renderContent(x, x.value, index);
     }
   });

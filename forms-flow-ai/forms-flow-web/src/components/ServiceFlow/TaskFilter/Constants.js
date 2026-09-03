@@ -39,18 +39,18 @@ export const documentStatusOptions = [
   },
 ];
 
-export const documentType = [
-  {
-    id: 0,
-    value: "",
-    name: "",
-  },
-  {
-    id: 1,
-    value: "noticeOfConstitutionalQuestionAndSupportingDocuments",
-    name: "Notice Of Constitutional Question And Supporting Documents",
-  },
-];
+// Replacing current hardcoded array with the dynamic, runtime-driven version.
+export const documentType = (window._env_?.DOCUMENT_TYPES || "")
+  .split(",")
+  .filter(Boolean)
+  .map((entry, index) => {
+    const [value, name] = entry.split(":");
+    return {
+      id: index + 1,
+      value: value || "",
+      name: name || value,
+    };
+  });
 
 export const staffGroup = [
   {

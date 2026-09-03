@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0g2siwq" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.48.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.15.0">
+  <bpmn:process id="save-request-data-process" name="Save Request Data Process" isExecutable="true" camunda:versionTag="0.1">
+    <bpmn:documentation>Creates or updates the servedDocuments record for a legal-service application.
+Called as a shared sub-process from ServeLegalProcess (initial create / save /
+completed) and VerifyServedDateProcess (post-serve save) — the `method`
+variable (POST or PUT) selects which behavior this run performs.
+
+Flow: Copy form data (fetches the current Form.io submission, strips
+internal-only fields, builds the API payload) → Get OAuth Token (Keycloak
+client-credentials) → Invoke api (creates/updates the servedDocuments
+record).
+
+Retry-safety design:
+- PUT (save/update) always overwrites with whatever Form.io currently holds,
+  so it's naturally idempotent — safe to retry any number of times.
+- POST (initial create) relies on the backend enforcing uniqueness on
+  applicationId: a retried create that gets HTTP 409 means an earlier attempt
+  already succeeded server-side (most likely a client-side timeout that hid
+  the original success), and is treated as success rather than a failure.
+  This is why "Invoke api" checks status codes explicitly instead of just
+  catching exceptions — see its own documentation for detail.
+
+Required incoming variables: applicationId, formUrl, method.
+Variables set: payload (filtered Form.io submission), apitoken, result (raw
+API response body).
+
+Failure handling: genuine failures (as opposed to the 409-is-success case
+above) throw plain JS errors, not BpmnError — intentionally, so they can't
+be caught/routed by a boundary event. "Copy form data" has
+camunda:asyncBefore="true", which creates the one async job boundary in
+this process; neither "Get OAuth Token" nor "Invoke api" has an asyncBefore
+of its own (Invoke api's asyncAfter only applies once it has already
+succeeded), so both run synchronously within that same job. An uncaught
+failure anywhere in this chain — the Form.io fetch, the token request, or
+the create/update call — therefore fails that one job and raises a single
+Camunda incident. The parent process instance PAUSES right there rather
+than ending or silently continuing, since by the time this runs the
+customer has already been told their submission was accepted. Once the
+underlying issue is fixed, retrying the job (Cockpit or automatic retry)
+resumes exactly where it left off. Each error message is prefixed with a
+code for diagnosability in the incident view:
+  Copy form data: [FORMIO_FORMURL_MISSING], [FORMIO_MISSING_PARAMETER],
+    [FORMIO_LOGIN_FAILED], [FORMIO_MISSING_JWT_TOKEN], [FORMIO_FETCH_NON_200]
+  Invoke api: [PAYLOAD_MISSING], [SERVEDOCUMENT_INVOKE_FAILED]</bpmn:documentation>
+    <bpmn:startEvent id="StartSaveStartEvent" name="start save">
+      <bpmn:outgoing>flow_start_to_copyformdata</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:scriptTask id="InvokeApiTask" name="Invoke api" camunda:asyncAfter="true" scriptFormat="javascript">
+      <bpmn:documentation>Creates (POST) or updates (PUT) the servedDocuments record.
+The backend returns HTTP 409 on POST when a record for this applicationId
+already exists — so if an earlier create timed out client-side after the
+write actually succeeded, a retried create gets 409 rather than a
+duplicate. 409 on POST is treated as an idempotent success, not a
+failure — no separate lookup call needed. PUT is idempotent by nature
+(always overwrites with the latest form data), so it needs no special
+casing at all.</bpmn:documentation>
+      <bpmn:incoming>flow_getauthtoken_to_invokeapi</bpmn:incoming>
+      <bpmn:outgoing>flow_invokeapi_to_end</bpmn:outgoing>
+      <bpmn:script>// ============================================================
+  // Script Task: Create/update the servedDocuments record.
+  // Engine: GraalJS (JDK 21) — avoid bare Java bean-property access
+  // (e.g. obj.prop); call explicit getters/Map.get() instead.
+  // ============================================================
+
+  var Logger = Java.type("org.slf4j.LoggerFactory");
+  var logger = Logger.getLogger("BPMN_SCRIPT");
+  var timestamp = new java.util.Date().toString();
+  var appId = execution.getVariable('applicationId');
+  var apitoken = execution.getVariable('apitoken');
+  var method = execution.getVariable('method');
+  var payloadStr = execution.getVariable('payload');
+
+  if (!payloadStr) {
+      throw new Error("[PAYLOAD_MISSING] Process variable 'payload' is null — fetch script failed upstream.");
+  }
+
+  var system = java.lang.System;
+  var servedocumentFullUrl = system.getenv("SERVEDOCUMENT_API_BASE_URL").concat("/api/v1/servedDocuments");
+  if (method === "PUT") {
+      servedocumentFullUrl = servedocumentFullUrl.concat("?applicationId=", appId);
+  }
+
+  logger.debug("*********[Save Request Data] {} :: {} :: {} {} - payload {}", timestamp, appId, method, servedocumentFullUrl, payloadStr);
+
+  try {
+      var response = org.camunda.connect.Connectors.getConnector("http-connector")
+          .createRequest()
+          .method(method)
+          .url(servedocumentFullUrl)
+          .header("Authorization", "Bearer " + apitoken)
+          .header("Accept", "application/json")
+          .header("Content-Type", "application/json")
+          .payload(payloadStr)
+          .execute();
+
+      var statusCode = response.getStatusCode();
+
+      if (statusCode &gt;= 200 &amp;&amp; statusCode &lt; 300) {
+          execution.setVariable("result", response.getResponse());
+          logger.info("*********[Save Request Data] {} :: {} :: {} succeeded - HTTP {}", timestamp, appId, method, statusCode);
+      } else if (method === "POST" &amp;&amp; statusCode === 409) {
+          // Uniqueness on applicationId means 409 here can only mean an
+          // earlier create already landed — most likely a prior attempt
+          // whose response we never saw (client timeout). Not a failure.
+          execution.setVariable("result", response.getResponse());
+          logger.info("*********[Save Request Data] {} :: {} :: create returned 409 — record already exists, treating as success", timestamp, appId);
+      } else {
+          throw new Error("[SERVEDOCUMENT_INVOKE_FAILED] Unexpected HTTP " + statusCode + " on " + method + " for applicationId=" + appId);
+      }
+
+  } catch (e) {
+      logger.error("*********[Save Request Data] {} :: {} :: {} failed: {}", timestamp, appId, method, e.message);
+      throw e;
+  }</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:endEvent id="EndSaveEndEvent" name="end save">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="start">
+          <camunda:script scriptFormat="javascript">var logger = Java.type("org.slf4j.LoggerFactory").getLogger("BPMN_SCRIPT");
+var timestamp = new java.util.Date().toString();
+
+logger.debug("*********[Save Request Data] {} :: {} :: Response - ", timestamp, applicationId, result);</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>flow_invokeapi_to_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="flow_invokeapi_to_end" sourceRef="InvokeApiTask" targetRef="EndSaveEndEvent" />
+    <bpmn:sequenceFlow id="flow_start_to_copyformdata" sourceRef="StartSaveStartEvent" targetRef="copyFormData" />
+    <bpmn:serviceTask id="GetOAuthTokenTask" name="Get OAuth Token">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="url">
+              <camunda:script scriptFormat="javascript">var system=java.lang.System;
+var  urlKCBase = system.getenv('KEYCLOAK_URL');
+var keycloakRealm = system.getenv('KEYCLOAK_URL_REALM');
+
+var urlKCFull = `${urlKCBase}/auth/realms/${keycloakRealm}/protocol/openid-connect/token`;
+
+urlKCFull;</camunda:script>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Content-Type">application/x-www-form-urlencoded</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="payload">
+              <camunda:script scriptFormat="javascript">var system = java.lang.System;
+var clientSecret = system.getenv("KEYCLOAK_CLIENTSECRET");
+var clientId = system.getenv("KEYCLOAK_CLIENTID");
+
+var mypayload = `grant_type=client_credentials&amp;client_id=${clientId}&amp;client_secret=${clientSecret}`;
+
+mypayload;</camunda:script>
+            </camunda:inputParameter>
+            <camunda:outputParameter name="apitoken">${S(response).prop("access_token").value()}</camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>flow_copyformdata_to_getauthtoken</bpmn:incoming>
+      <bpmn:outgoing>flow_getauthtoken_to_invokeapi</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="flow_getauthtoken_to_invokeapi" sourceRef="GetOAuthTokenTask" targetRef="InvokeApiTask" />
+    <bpmn:scriptTask id="copyFormData" name="Copy form data" camunda:asyncBefore="true" scriptFormat="javascript">
+      <bpmn:documentation>Fetches the current Form.io submission for this application and builds the
+'payload' variable that "Invoke api" sends downstream.
+
+Steps: logs in to Form.io as the root user (FORMIO_ROOT_EMAIL/PASSWORD) to
+get an x-jwt-token, GETs the submission at 'formUrl', strips internal-only
+fields (currentUser, submitterEmail, submitterFirstName, submitterLastName,
+currentUserRoles) that shouldn't be sent to the external API, then stores
+the rest as a JSON string in 'payload'.
+
+Always re-fetches the latest submission rather than relying on a value
+passed in — this is what makes the PUT (save/update) calls downstream safe
+to retry: repeating a PUT just re-applies whatever is currently true, never
+a stale snapshot.
+
+Throws a plain JS Error on failure, with an error code prefixed in the
+message (see the process documentation for the list) — deliberately not a
+BpmnError, so it can't be caught and routed by a boundary event. This task
+itself is camunda:asyncBefore="true" — it's the async job boundary for the
+whole process, so an uncaught failure here (or in Get OAuth Token / Invoke
+api, which run synchronously after it within the same job) raises a
+Camunda incident and pauses the parent process instance rather than ending
+it or letting it continue silently; it resumes once the underlying issue
+is fixed and the job is retried.
+</bpmn:documentation>
+      <bpmn:incoming>flow_start_to_copyformdata</bpmn:incoming>
+      <bpmn:outgoing>flow_copyformdata_to_getauthtoken</bpmn:outgoing>
+      <bpmn:script>// ============================================================
+  // Script Task: Fetch Form.io Submission → Set 'payload' variable
+  // Engine: GraalJS (JDK 21) — avoid bare Java bean-property access
+  // (e.g. obj.prop); call explicit getters/Map.get() instead.
+  // Output: execution.setVariable("payload", &lt;JSON string&gt;)
+  // ============================================================
+
+  var Logger = Java.type("org.slf4j.LoggerFactory");
+  var logger = Logger.getLogger("BPMN_SCRIPT");
+  var timestamp = new java.util.Date().toString();
+  var appId = execution.getVariable('applicationId');
+
+  // Guard: formUrl must exist — set by formsflow ApplicationStateListener
+  var formUrl = execution.getVariable("formUrl");
+  if (!formUrl) {
+      throw new Error("[FORMIO_FORMURL_MISSING] Process variable 'formUrl' is null — cannot fetch Form.io submission.");
+  }
+
+  // ── Fields to strip before sending to external API ──────────
+  var EXCLUSION_LIST = [
+      "currentUser",
+      "submitterEmail",
+      "submitterFirstName",
+      "submitterLastName",
+      "currentUserRoles"
+  ];
+
+  try {
+      // ── 1. Auth ──────────────────────────────────────────────
+      var formioToken = getFormioToken();
+
+      // ── 2. Fetch submission ──────────────────────────────────
+      var response = org.camunda.connect.Connectors.getConnector("http-connector")
+          .createRequest()
+          .get()
+          .url(formUrl)
+          .header("x-jwt-token", formioToken)
+          .header("Accept", "application/json")
+          .execute();
+
+      if (response.getStatusCode() !== 200) {
+          throw new Error("[FORMIO_FETCH_NON_200] Form.io fetch failed: HTTP " + response.getStatusCode() + " for " + formUrl);
+      }
+
+      var submission = JSON.parse(response.getResponse());
+      var formData = submission.data;
+
+      logger.debug("********* {} :: {} :: Form.io submission fetched — building payload", timestamp, appId);
+
+      // ── 3. Build filtered payload object ────────────────────
+      var payloadObj = {};
+
+      for (var key in formData) {
+          if (!formData.hasOwnProperty(key)) continue;
+
+          if (EXCLUSION_LIST.indexOf(key) !== -1) {
+              logger.debug("********* {} :: {} :: EXCLUDED [{}]", timestamp, appId, key);
+              continue;
+          }
+
+          payloadObj[key] = formData[key];
+          logger.debug("********* {} :: {} :: INCLUDED [{}] type={}", timestamp, appId, key, typeof formData[key]);
+      }
+
+      // ── 4. Store as JSON string — InvokeApiTask reads this ──
+      var payloadStr = JSON.stringify(payloadObj);
+      execution.setVariable("payload", payloadStr);
+
+      logger.info("********* {} :: {} :: payload set — keys={} chars={}",
+          timestamp, appId,
+          Object.keys(payloadObj).length,
+          payloadStr.length
+      );
+
+  } catch (e) {
+      logger.error("********* {} :: {} :: FATAL — Form.io fetch script failed: {}", timestamp, appId, e.message);
+      throw e;
+  }
+
+  // ── Auth helper ─────────────────────────────────────────────
+  function getFormioToken() {
+      var formApi  = java.lang.System.getenv("FORMIO_URL");
+      var email    = java.lang.System.getenv("FORMIO_ROOT_EMAIL");
+      var password = java.lang.System.getenv("FORMIO_ROOT_PASSWORD");
+
+      if (!formApi || !email || !password) {
+          throw new Error("[FORMIO_MISSING_PARAMETER] Missing env vars: FORMIO_URL / FORMIO_ROOT_EMAIL / FORMIO_ROOT_PASSWORD");
+      }
+
+      var url = new java.net.URL(formApi + "/user/login");
+      var conn = url.openConnection();
+      conn.setRequestMethod("POST");
+      conn.setDoOutput(true);
+      conn.setRequestProperty("Content-Type", "application/json");
+
+      var loginPayload = JSON.stringify({ data: { email: email, password: password } });
+        var osw = new java.io.OutputStreamWriter(conn.getOutputStream(), "UTF-8");
+        osw.write(loginPayload);
+        osw.flush();
+        osw.close();
+
+      var status = conn.getResponseCode();
+      if (status &lt; 200 || status &gt;= 300) {
+          throw new Error("[FORMIO_LOGIN_FAILED] Form.io login failed: HTTP " + status);
+      }
+
+      var token = conn.getHeaderField("x-jwt-token");
+      if (!token) {
+          throw new Error("[FORMIO_MISSING_JWT_TOKEN] Form.io login succeeded but x-jwt-token header is absent.");
+      }
+
+      logger.debug("********* {} :: {} :: Form.io token acquired", timestamp, appId);
+      return token;
+  }</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="flow_copyformdata_to_getauthtoken" sourceRef="copyFormData" targetRef="GetOAuthTokenTask" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="save-request-data-process">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartSaveStartEvent">
+        <dc:Bounds x="142" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="137" y="145" width="48" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0kbq5j8_di" bpmnElement="InvokeApiTask">
+        <dc:Bounds x="540" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0dcosv7_di" bpmnElement="EndSaveEndEvent">
+        <dc:Bounds x="692" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="688" y="145" width="45" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1e9gs3w_di" bpmnElement="GetOAuthTokenTask">
+        <dc:Bounds x="380" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0kwkuzc" bpmnElement="copyFormData">
+        <dc:Bounds x="230" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0dbbj54_di" bpmnElement="flow_start_to_copyformdata">
+        <di:waypoint x="178" y="120" />
+        <di:waypoint x="230" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_091n8il_di" bpmnElement="flow_getauthtoken_to_invokeapi">
+        <di:waypoint x="480" y="120" />
+        <di:waypoint x="540" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0suj7s2_di" bpmnElement="flow_invokeapi_to_end">
+        <di:waypoint x="640" y="120" />
+        <di:waypoint x="692" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1lgvyeb_di" bpmnElement="flow_copyformdata_to_getauthtoken">
+        <di:waypoint x="330" y="120" />
+        <di:waypoint x="380" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
